@@ -27,6 +27,34 @@ def texInit(fontsize):
     mp.rcParams["text.usetex"] = True
 
 
+def animate(frame):
+    # use the S/N threshold of the survey
+    vmax = 10
+    if np.min(hist[frame]) > vmax:
+        # if the observation is completely washed out (no 0 pixels), do this to
+        # make sure plotting doesn't fail
+        vmax = np.min(hist[frame])
+
+    plt.imshow(hist[frame], origin="lower", interpolation="nearest",          \
+               cmap="Blues", aspect=aspect, vmax=vmax)
+
+    ticks, labels = plt.xticks()
+    plt.xticks(ticks,                                                         \
+               map(mjd2lst,                                                   \
+                   minMJD + (ticks * ((maxMJD - minMJD) / numTimeBins))))
+    plt.xlim(0, numTimeBins)
+
+    ticks, labels = plt.yticks()
+    plt.yticks(ticks,                                                         \
+               map(lambda val: r"$%g$" % val,                                 \
+                   ticks * ((DMMax - DMMin) / numDMBins)))
+    plt.ylim(0, numDMBins)
+
+    plt.title(r"${\rm %s:%s~Beam~%s}$" % (date, time, beams[frame]))
+    plt.xlabel(r"${\rm LST}$")
+    plt.ylabel(r"${\rm DM~(cm}^{-3}{\rm~pc)}$")
+
+
 def mjd2lst(mjd):
     arecibo = ephem.Observer()
     arecibo.lon = "-66:45.185"
@@ -106,29 +134,27 @@ numTimeBins = (maxMJD - minMJD) * SecondsPerDay / TimeBinWidth
 numDMBins = (DMMax - DMMin) / DMBinWidth
 
 # loop through input files and generate 2D histograms
-histSum = np.zeros((numDMBins, numTimeBins))
+hist = np.zeros((numFiles, numDMBins, numTimeBins))
+i = 0
+beams = []
 for f in files:
     # read the file; data is [MJD, DM, S/N, smoothing width]; ndmin=2 ensures
     # that files with a single event are handled properly
     data = np.loadtxt(f, dtype=float, delimiter=",", comments="#", ndmin=2)
+    # generate beam ID array to be used for plot title
+    beams.append(f[4])
     # 2D-bin the axis ranges
-    hist, xbe, ybe = np.histogram2d(data[:,1], data[:,0],                     \
-                                    bins=(numDMBins,numTimeBins),          \
-                                    range=((DMMin,DMMax),(minMJD,maxMJD)), \
-                                    weights=data[:,2])
-    histSum += hist
+    hist[i], xbe, ybe = np.histogram2d(data[:,1], data[:,0],                  \
+                                       bins=(numDMBins,numTimeBins),          \
+                                       range=((DMMin,DMMax),(minMJD,maxMJD)), \
+                                       weights=data[:,2])
+    i += 1
 
 # initialize TeX stuff
 texInit(16)
 
 # calculate aspect ratio based on the number of bins used
 aspect = float(numTimeBins) / (2 * numDMBins)
-# use the S/N threshold of the survey
-vmax = 10
-if np.min(hist) > vmax:
-    # if the observation is completely washed out (no 0 pixels), do this to
-    # make sure plotting doesn't fail
-    vmax = np.min(hist)
 
 # get date
 date = files[0][10:18]
@@ -137,28 +163,9 @@ time = files[0][19:25]
 
 # set up a large figure (16 inches x 9 inches)
 fig = plt.figure(figsize=(16.0, 9.0))
-
-plt.imshow(histSum, origin="lower", interpolation="nearest",                  \
-           cmap="Blues", aspect=aspect, vmax=vmax)
-
-ticks, labels = plt.xticks()
-plt.xticks(ticks,                                                             \
-           map(mjd2lst,                                                       \
-               minMJD + (ticks * ((maxMJD - minMJD) / numTimeBins))))
-plt.xlim(0, numTimeBins)
-
-ticks, labels = plt.yticks()
-plt.yticks(ticks,                                                             \
-           map(lambda val: r"$%g$" % val,                                     \
-               ticks * ((DMMax - DMMin) / numDMBins)))
-plt.ylim(0, numDMBins)
-
-plt.title(r"${\rm %s:%s}$" % (date, time))
-plt.xlabel(r"${\rm LST}$")
-plt.ylabel(r"${\rm DM~(cm}^{-3}{\rm~pc)}$")
-
+anim = ma.FuncAnimation(fig, animate, frames=numFiles)
 # build filename
-fileImg = "AllBeams_D" + date + "T" + time + ".png"
+fileImg = "AllBeams_D" + date + "T" + time + ".gif"
 # use a high DPI for high resolution
-plt.savefig(fileImg, dpi=192, bbox_inches="tight")
+anim.save(fileImg, dpi=192, writer="imagemagick", fps=1)
 
