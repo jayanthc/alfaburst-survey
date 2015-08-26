@@ -1,0 +1,7 @@
+# no need to track log files, data, and plots
+Data/**
+!Data/Latest/.gitignore
+Log/**
+!Log/.gitignore
+Plots/**
+!Plots/.gitignore

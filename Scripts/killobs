@@ -1,0 +1,3 @@
+top -b -n1 >> /data/Survey/Log/killlog
+killall -9  ABServer
+killall -9  ABPipeline
