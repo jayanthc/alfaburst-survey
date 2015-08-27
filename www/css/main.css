@@ -1,0 +1,33 @@
+body
+{
+    background-color: #FFFFFF;
+    color: #000000;
+    margin: 0px;
+}
+
+h1#title
+{
+    position: absolute;
+    top: 225px;
+    width: 100%;
+    font-family: "Economica", Arial, sans-serif;
+    font-size: 42pt;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: -2px;
+}
+
+div#logoContainer
+{
+    position: absolute;
+    top: 140px;
+    width: 100%;
+    height: 200px;
+    text-align: center;
+}
+
+img#logo
+{
+    height: 128px;
+    width: 128px;
+}
