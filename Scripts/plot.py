@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 # plot.py
-# Makes a GIF animation of data from input event files. It is expected that all
-# beams from one observing session is given as input.
+# Makes a plot of data from input event files. It is expected that all beams
+# from one observing session is given as input.
 
 import sys
 import getopt
@@ -113,8 +113,8 @@ for f in files:
     data = np.loadtxt(f, dtype=float, delimiter=",", comments="#", ndmin=2)
     # 2D-bin the axis ranges
     hist, xbe, ybe = np.histogram2d(data[:,1], data[:,0],                     \
-                                    bins=(numDMBins,numTimeBins),          \
-                                    range=((DMMin,DMMax),(minMJD,maxMJD)), \
+                                    bins=(numDMBins,numTimeBins),             \
+                                    range=((DMMin,DMMax),(minMJD,maxMJD)),    \
                                     weights=data[:,2])
     histSum += hist
 
@@ -125,10 +125,10 @@ texInit(16)
 aspect = float(numTimeBins) / (2 * numDMBins)
 # use the S/N threshold of the survey
 vmax = 10
-if np.min(hist) > vmax:
+if np.min(histSum) > vmax:
     # if the observation is completely washed out (no 0 pixels), do this to
     # make sure plotting doesn't fail
-    vmax = np.min(hist)
+    vmax = np.min(histSum)
 
 # get date
 date = files[0][10:18]
