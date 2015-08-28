@@ -38,9 +38,11 @@ def animate(frame):
     size = 2 * (hist[frame][hist[frame] > 0] + 10 + (beamScale * numBeams)    \
                 - (beamScale * beamID))
     col = cmap(beamID * 255 / numBeams)
+    # clear axes before plotting
+    plt.cla()
     plt.scatter(lst, dm, s=size, c=col)
 
-    ticks, labels = plt.xticks()
+    ticks = numTimeBins * (xVals - minMJD) / (maxMJD - minMJD)
     plt.xticks(ticks,                                                         \
                map(mjd2lst,                                                   \
                    minMJD + (ticks * ((maxMJD - minMJD) / numTimeBins))))
@@ -142,6 +144,9 @@ fig = plt.figure(figsize=(16.0, 9.0))
 
 cmap = plt.get_cmap("jet")
 
+# set up the x-axis tick marks based on global (all-beam) range
+xVals = np.linspace(minMJD, maxMJD, 6)
+
 # loop through input files and generate 2D histograms
 hist = np.zeros((numFiles, numDMBins, numTimeBins))
 i = 0
@@ -157,7 +162,7 @@ for f in files:
     hist[i], ybe, xbe = np.histogram2d(data[:,1], data[:,0],                  \
                                        bins=(numDMBins,numTimeBins),          \
                                        range=((DMMin,DMMax),(minMJD,maxMJD)), \
-                                       weights=data[:,2])
+                                       weights=data[:,2], normed=True)
     # remove RFI; if >= 70% of DM bins in a time bin contains events, set all
     # those to 0
     for j in range(numTimeBins):
