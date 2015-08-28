@@ -140,6 +140,8 @@ numDMBins = int(np.ceil((DMMax - DMMin) / DMBinWidth))
 # set up a large figure (16 inches x 9 inches)
 fig = plt.figure(figsize=(16.0, 9.0))
 
+cmap = plt.get_cmap("jet")
+
 # loop through input files and generate 2D histograms
 hist = np.zeros((numFiles, numDMBins, numTimeBins))
 i = 0
