@@ -111,6 +111,13 @@ for i in 0...NumComputeNodes
   end
 end
 
+# check if there are files to process, if not exit
+numFiles = (%x[ls *.dat | wc -l]).to_i
+if 0 == numFiles
+    %x[echo "No files." >> #{PlotsDir}/#{today}.log]
+    exit
+end
+
 # remove bad lines
 cmd = "ls *.dat | xargs -n 1 #{ScriptsDir}/removeBadLines.rb"
 if dryRun
@@ -131,7 +138,7 @@ epochGlobs = %x[#{cmd}]
 
 # generate a plot per epoch
 epochGlobs.each_line do |epochGlob|
-  cmd = "#{ScriptsDir}/plotGIF.py #{epochGlob.strip()}"
+  cmd = "#{ScriptsDir}/plotScatter.py #{epochGlob.strip()}"
   if dryRun
     print cmd, "\n"
   else
@@ -140,7 +147,7 @@ epochGlobs.each_line do |epochGlob|
 end
 
 # move plots to plots directory
-cmd = "mv #{LatestDataDir}/*gif #{PlotsDir}"
+cmd = "mv #{LatestDataDir}/*png #{PlotsDir}"
 if dryRun
   print cmd, "\n"
 else

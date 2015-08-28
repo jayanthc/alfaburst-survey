@@ -1,6 +1,6 @@
-#!/opt/local/bin/python
+#!/usr/bin/python
 
-# plot.py
+# plotScatter.py
 # Makes a plot of data from input event files. It is expected that all beams
 # from one observing session is given as input.
 
@@ -11,9 +11,7 @@ import ephem
 import matplotlib as mp
 mp.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.animation as ma
-import matplotlib.dates as md
-import datetime as dt
+import Image
 
 def texInit(fontsize):
     # set plotting font properties
@@ -92,6 +90,7 @@ minMJD = 100000.0
 maxMJD = 0.0
 files = sys.argv[optind:]
 for f in files:
+    print "Preprocessing %s..." % f
     # read the file; data is [MJD, DM, S/N, smoothing width]; ndmin=2 ensures
     # that files with a single event are handled properly
     data = np.loadtxt(f, dtype=float, delimiter=",", comments="#", ndmin=2)
@@ -115,11 +114,11 @@ cmap = plt.get_cmap("jet")
 numBeams = 7
 beamScale = 3
 plotLabels = []
-i = 0
 histSum = np.zeros((numDMBins, numTimeBins))
+i = 0
 for f in files:
     print "Processing %s..." % f
-    beamID = f[4]
+    beamID = int(f[4])
     # read the file; data is [MJD, DM, S/N, smoothing width]; ndmin=2 ensures
     # that files with a single event are handled properly
     data = np.loadtxt(f, dtype=float, delimiter=",", comments="#", ndmin=2)
@@ -133,9 +132,10 @@ for f in files:
     dm = events[0]
     lst = events[1]
     # shift the values up and scale them appropriately for better plotting
-    size = 2 * (hist[hist > 0] + 10 + (beamScale * numBeams) - (beamScale * i))
-    col = cmap(i * 255 / numBeams)
-    plotLabels.append(r"${\rm Beam~%s$" % beamID)
+    size = 2 * (hist[hist > 0] + 10 + (beamScale * numBeams)                  \
+                - (beamScale * beamID))
+    col = cmap(beamID * 255 / numBeams)
+    plotLabels.append(r"${\rm Beam~%d}$" % beamID)
     plt.scatter(lst, dm, s=size, c=col, label=plotLabels[i])
     histSum += hist
     i += 1
@@ -171,10 +171,20 @@ plt.yticks(ticks,                                                             \
 plt.ylim(0, numDMBins)
 
 plt.legend(plotLabels, loc="upper left", fontsize=fontSize,                   \
-           bbox_to_anchor=(1.0, 0.8), numpoints=1)
+           bbox_to_anchor=(1.0, 0.8), scatterpoints=1, frameon=False)
 plt.title(r"${\rm %s:%s}$" % (date, time))
 plt.xlabel(r"${\rm LST}$")
 plt.ylabel(r"${\rm DM~(cm}^{-3}{\rm~pc)}$")
+
+# import ALFABURST logo
+logo = Image.open("/home/artemis/Survey/Images/alfaburst_logowithtext.png")
+width = logo.size[0]
+height = logo.size[1]
+
+# convert to float values between 0 and 1
+logo = np.array(logo).astype(np.float) / 255
+
+fig.figimage(logo, 2 * fig.bbox.xmax, 2 * fig.bbox.ymax - 150, zorder=1)
 
 # build filename
 fileImg = "AllBeams_D" + date + "T" + time + ".png"

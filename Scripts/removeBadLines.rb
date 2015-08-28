@@ -17,7 +17,7 @@ File.open(fileIn, "r").each_line do |line|
     matchedChars = /^#/.match(line)
     if nil == matchedChars
         # not a comment line, so proceed
-        matchedChars = /^[0-9]{5}.[0-9]+,\s+[0-9]+[.]?[0-9]*,\s+[0-9]+.[0-9]+,\s+[0-9]{1,2}$/.match(line)
+        matchedChars = /^[0-9]{5}.[0-9]+,\s+[0-9]{1,4}[.]?[0-9]*,\s+[0-9]+.[0-9]+,\s+[0-9]{1,2}$/.match(line)
         if nil == matchedChars
             numBadLines += 1
         else
