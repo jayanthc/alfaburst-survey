@@ -9,7 +9,6 @@ import math
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
 
 
 def texInit(fontsize):
@@ -34,21 +33,6 @@ def ddmm2deg(ddmm):
             + ((math.modf(fDec / 100)[0] * 100) / 60.0)
 
 
-def plotBeams(pntRA, pntDec):
-    # plot the beam centre
-    #plt.plot(pntRA, pntDec, "rx")
-    sky.plot(pntRA, pntDec, "rx")
-    '''
-    # plot the centre beam, up to HWHM on all sides
-    beam = plt.Circle((pntRA, pntDec), hwhm, color="r", fill=False)
-    fig = plt.gcf()
-    fig.gca().add_artist(beam)
-    # plot the maximum extent of the outer beams
-    outerBeams = plt.Circle((pntRA, pntDec), r + hwhm, color="g", fill=False)
-    fig.gca().add_artist(outerBeams)
-    '''
-
-
 #texInit(16)
 
 # constants
@@ -65,92 +49,75 @@ arcmin2degFactor = 1.0 / 60
 hwhm *= arcmin2degFactor
 r *= arcmin2degFactor
 
-# pointing of the centre beam
-#pntRA = float(sys.argv[1]) * degPerHour
-#pntDec = float(sys.argv[2])
-
-## 22:10
-#pntRA1 = 18.6589730281 * degPerHour
-#pntDec1 = 27.7909414941
-#plotBeams(pntRA1, pntDec1)
-
-# 22:15
-pntRA = 19.2225166779 * degPerHour
-pntRA -= 180
-pntRA = -pntRA
-print pntRA
-pntDec = 9.0792778401
-
-sky = Basemap(llcrnrlon=-160, llcrnrlat=5, urcrnrlon=-60, urcrnrlat=30,       \
-        rsphere=(6378137.0, 6356752.3142), resolution="l", projection="merc", \
-        lat_0=pntDec, lon_0=pntRA)
-
-#plotBeams(pntRA, pntDec)
-x, y = sky(pntRA, pntDec)
-sky.plot(x, y, "go")
-
-# 22:20
-pntRA1 = 19.4562500074 * degPerHour
-pntRA1 -= 180
-pntRA1 = -pntRA1
-print pntRA1
-pntDec1 = 21.8061944871
-#plotBeams(pntRA1, pntDec1)
-
-x, y = sky(pntRA1, pntDec1)
-sky.plot(x, y, "go")
-
-# draw line between two pointings
-#plt.plot([pntRA, pntRA1], [pntDec, pntDec1], color="k", linestyle=":")
-sky.drawgreatcircle(pntRA, pntDec, pntRA1, pntDec1, color="g")
-#sky.drawcoastlines()
-#sky.fillcontinents()
+# read the pointings
+pointings = np.loadtxt("pointings", delimiter=",")
+i = 0
+for pointing in pointings:
+    pntRA = pointing[0] * degPerHour
+    pntDec = pointing[1]
+    # plot the beam centre
+    plt.plot(pntRA, pntDec, "rx")
+    # plot the beam number
+    plt.text(pntRA + 0.005, pntDec + 0.005, str(i), color="black", fontsize=12)
+    # plot the extent of the beam, up to HWHM on all sides
+    beam = plt.Circle((pntRA, pntDec), hwhm, color="r", fill=False)
+    fig = plt.gcf()
+    fig.gca().add_artist(beam)
+    i += 1
 
 '''
-# 22:25
-pntRA = 19.4562500074 * degPerHour
-pntDec = 21.8061944871
-plotBeams(pntRA, pntDec)
-
-# 22:30
-pntRA = 19.5318611179 * degPerHour
-pntDec = 21.8062222606
-plotBeams(pntRA, pntDec)
-
-# 22:35
-pntRA = 19.4628055628 * degPerHour
-pntDec = 21.9248889311
-plotBeams(pntRA, pntDec)
+#19:13:21.061
+srcRA = 19.22251694444444444443 * degPerHour
+#+09:04:45.4
+srcDec = 9.07927777777777777777
+plt.plot(srcRA, srcDec, "bo")
+plt.text(srcRA + 0.005, srcDec + 0.005, "J1913+0904", color="black", fontsize=12)
 '''
 
+'''
+#19:15:29.984
+srcRA = 19.25832888888888888888 * degPerHour
+#+10:09:43.67  
+srcDec = 10.16213055555555555555
+plt.plot(srcRA, srcDec, "bo")
+plt.text(srcRA + 0.005, srcDec + 0.005, "B1913+10", color="black", fontsize=12)
+'''
+
+#19:03:29.981
+srcRA = 19.0583280556 * degPerHour
+#01:35:38.33  
+srcDec = 1.5939805556
+plt.plot(srcRA, srcDec, "bo")
+plt.text(srcRA + 0.005, srcDec + 0.005, "B1900+01", color="black", fontsize=12)
+
+
+'''
 # read the source list
 sources = np.loadtxt("sources", dtype=str)
 
-delimIdx = 9
+#delimIdx = 9
 RA = np.zeros(len(sources))
 dec = np.zeros(len(sources))
 for i in range(len(sources)):
     source = sources[i]
     # convert the hhmm right ascension to degrees
     RA[i] = hhmm2deg(source[0:2], source[2:4])
-    RA[i] -= 180
-    RA[i] = -RA[i]
-    print RA[i]
     # convert the ddmm declination to degrees
     if source[4] != "+" and source[4] != "-":
-        print "<p>ERROR: Incorrect co-ordinate format.</p>"
+        print "ERROR: Incorrect co-ordinate format."
         continue
     dec[i] = ddmm2deg(source[4:9])
-    x, y = sky(RA[i], dec[i])
-    if i >= delimIdx:
-        #plt.plot(RA[i], dec[i], "mo")
-        sky.plot(x, y, "mo")
-    else:
-        #plt.plot(RA[i], dec[i], "bo")
-        sky.plot(x, y, "bo")
+    #if i >= delimIdx:
+    #    plt.plot(RA[i], dec[i], "mo")
+    #else:
+    #    plt.plot(RA[i], dec[i], "bo")
+    plt.plot(RA[i], dec[i], "bo")
+    # plot the pulsar name
+    plt.text(RA[i] + 0.005, dec[i] + 0.005, "J" + source, color="black", fontsize=12)
+'''
 
-#plt.xlim(np.min(RA) - 1, np.max(RA) + 1)
-#plt.ylim(np.min(dec) - 0.5, np.max(dec) + 0.5)
+plt.xlabel("RA (deg.)")
+plt.ylabel("Dec. (deg.)")
 
 plt.show()
 

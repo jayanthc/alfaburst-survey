@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-# plot.py
-# Makes a GIF animation of data from input event files. It is expected that all
-# beams from one observing session is given as input.
+# plotHist.py
+# Makes a plot of data from input event files. It is expected that all beams
+# from one observing session is given as input.
 
 import sys
 import getopt
@@ -11,9 +11,6 @@ import ephem
 import matplotlib as mp
 mp.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.animation as ma
-import matplotlib.dates as md
-import datetime as dt
 
 def texInit(fontsize):
     # set plotting font properties
@@ -25,34 +22,6 @@ def texInit(fontsize):
     mp.rcParams["ps.useafm"] = True
     mp.rcParams["pdf.use14corefonts"] = True
     mp.rcParams["text.usetex"] = True
-
-
-def animate(frame):
-    # use the S/N threshold of the survey
-    vmax = 10
-    if np.min(hist[frame]) > vmax:
-        # if the observation is completely washed out (no 0 pixels), do this to
-        # make sure plotting doesn't fail
-        vmax = np.min(hist[frame])
-
-    plt.imshow(hist[frame], origin="lower", interpolation="nearest",          \
-               cmap="Blues", aspect=aspect, vmax=vmax)
-
-    ticks, labels = plt.xticks()
-    plt.xticks(ticks,                                                         \
-               map(mjd2lst,                                                   \
-                   minMJD + (ticks * ((maxMJD - minMJD) / numTimeBins))))
-    plt.xlim(0, numTimeBins)
-
-    ticks, labels = plt.yticks()
-    plt.yticks(ticks,                                                         \
-               map(lambda val: r"$%g$" % val,                                 \
-                   ticks * ((DMMax - DMMin) / numDMBins)))
-    plt.ylim(0, numDMBins)
-
-    plt.title(r"${\rm %s:%s~Beam~%s}$" % (date, time, beams[frame]))
-    plt.xlabel(r"${\rm LST}$")
-    plt.ylabel(r"${\rm DM~(cm}^{-3}{\rm~pc)}$")
 
 
 def mjd2lst(mjd):
@@ -81,7 +50,7 @@ def PrintUsage(ProgName):
 PlotToScreen = False            # plot-to-screen flag
 DMMin = 0.0                     # cm^-3 pc
 DMMax = 2560.0                  # cm^-3 pc
-DMBinWidth = 4.0                # cm^-3 pc
+DMBinWidth = 6.0                # cm^-3 pc
 TimeBinWidth = 16.0             # seconds
 SecondsPerDay = 86400.0         # seconds
 
@@ -120,7 +89,7 @@ minMJD = 100000.0
 maxMJD = 0.0
 files = sys.argv[optind:]
 for f in files:
-    print "Loading %s..." % f
+    print "Preprocessing %s..." % f
     # read the file; data is [MJD, DM, S/N, smoothing width]; ndmin=2 ensures
     # that files with a single event are handled properly
     data = np.loadtxt(f, dtype=float, delimiter=",", comments="#", ndmin=2)
@@ -129,43 +98,66 @@ for f in files:
     maxMJD = np.fmax(np.max(data[:,0]), maxMJD)
 
 # calculate number of time bins
-numTimeBins = (maxMJD - minMJD) * SecondsPerDay / TimeBinWidth
+numTimeBins = int(np.ceil((maxMJD - minMJD) * SecondsPerDay / TimeBinWidth))
 # calculate number of DM bins
-numDMBins = (DMMax - DMMin) / DMBinWidth
+numDMBins = int(np.ceil((DMMax - DMMin) / DMBinWidth))
+
+# set up a large figure (16 inches x 9 inches)
+fig = plt.figure(figsize=(16.0, 9.0))
 
 # loop through input files and generate 2D histograms
-hist = np.zeros((numFiles, numDMBins, numTimeBins))
-i = 0
-beams = []
+histSum = np.zeros((numDMBins, numTimeBins))
 for f in files:
+    print "Processing %s..." % f
     # read the file; data is [MJD, DM, S/N, smoothing width]; ndmin=2 ensures
     # that files with a single event are handled properly
     data = np.loadtxt(f, dtype=float, delimiter=",", comments="#", ndmin=2)
-    # generate beam ID array to be used for plot title
-    beams.append(f[4])
     # 2D-bin the axis ranges
-    hist[i], xbe, ybe = np.histogram2d(data[:,1], data[:,0],                  \
-                                       bins=(numDMBins,numTimeBins),          \
-                                       range=((DMMin,DMMax),(minMJD,maxMJD)), \
-                                       weights=data[:,2])
-    i += 1
+    hist, ybe, xbe = np.histogram2d(data[:,1], data[:,0],                     \
+                                    bins=(numDMBins,numTimeBins),             \
+                                    range=((DMMin,DMMax),(minMJD,maxMJD)),    \
+                                    weights=data[:,2])
+    histSum += hist
 
 # initialize TeX stuff
-texInit(16)
+fontSize = 16
+texInit(fontSize)
 
 # calculate aspect ratio based on the number of bins used
 aspect = float(numTimeBins) / (2 * numDMBins)
+# use the S/N threshold of the survey
+vmax = 10
+if np.min(histSum) > vmax:
+    # if the observation is completely washed out (no 0 pixels), do this to
+    # make sure plotting doesn't fail
+    vmax = np.min(histSum)
 
 # get date
 date = files[0][10:18]
 # get time
 time = files[0][19:25]
 
-# set up a large figure (16 inches x 9 inches)
-fig = plt.figure(figsize=(16.0, 9.0))
-anim = ma.FuncAnimation(fig, animate, frames=numFiles)
+plt.imshow(histSum, origin="lower", interpolation="nearest",                  \
+           cmap="Blues", aspect=aspect, vmax=vmax)
+
+ticks, labels = plt.xticks()
+plt.xticks(ticks,                                                             \
+           map(mjd2lst,                                                       \
+               minMJD + (ticks * ((maxMJD - minMJD) / numTimeBins))))
+plt.xlim(0, numTimeBins)
+
+ticks, labels = plt.yticks()
+plt.yticks(ticks,                                                             \
+           map(lambda val: r"$%4.0f$" % val,                                  \
+               ticks * ((DMMax - DMMin) / numDMBins)))
+plt.ylim(0, numDMBins)
+
+plt.title(r"${\rm %s:%s}$" % (date, time))
+plt.xlabel(r"${\rm LST}$")
+plt.ylabel(r"${\rm DM~(cm}^{-3}{\rm~pc)}$")
+
 # build filename
-fileImg = "AllBeams_D" + date + "T" + time + ".gif"
+fileImg = "AllBeams_D" + date + "T" + time + ".hist.png"
 # use a high DPI for high resolution
-anim.save(fileImg, dpi=192, writer="imagemagick", fps=1)
+plt.savefig(fileImg, dpi=192, bbox_inches="tight")
 
