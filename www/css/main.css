@@ -3,31 +3,100 @@ body
     background-color: #FFFFFF;
     color: #000000;
     margin: 0px;
+    font-family: "Roboto", Arial, sans-serif;
+    font-weight: 300;
+    font-size: 12pt;
 }
 
-h1#title
+header
 {
-    position: absolute;
-    top: 225px;
+    position: fixed;
+    top: 0px;
     width: 100%;
+    height: 100px;
+    background-color: #424242;
+    border-bottom-width: 5px;
+    border-bottom-color: #9E9E9E;
+    border-bottom-style: solid;
+}
+
+header div#logoContainerContainer
+{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 72px;
+    height: 100px;
+    background-color: #212121;
+}
+
+header div#logoContainer
+{
+    position: fixed;
+    top: 12px;
+    left: 6px;
+    width: 60px;
+    text-align: center;
+}
+
+header img#logo
+{
+    height: 48px;
+    width: 48px;
+}
+
+header h1#title
+{
+    position: fixed;
+    top: 50px;
+    left: 6px;
+    width: 60px;
     font-family: "Economica", Arial, sans-serif;
-    font-size: 42pt;
+    font-size: 16pt;
+    font-weight: 400;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+header span#heading
+{
+    position: fixed;
+    left: 100px;
+    top: 30px;
+    color: #FFC107;
+    font-family: "Open Sans Condensed", Arial, sans-serif;
+    font-weight: 300;
+    font-size: 24pt;
+}
+
+article h2
+{
+    position: relative;
+    top: 120px;
+    text-align: center;
+    font-family: "Open Sans Condensed", Arial, sans-serif;
     font-weight: 700;
-    text-align: center;
-    letter-spacing: -2px;
+    font-size: 14pt;
 }
 
-div#logoContainer
+article section
 {
-    position: absolute;
-    top: 140px;
+    position: relative;
+    top: 120px;
+    text-align: center;
+}
+
+footer
+{
+    position: fixed;
+    bottom: 0px;
     width: 100%;
-    height: 200px;
+    height: 20px;
+    background-color: #424242;
+    color: #FFFFFF;
+    font-family: "Open Sans Condensed", Arial, sans-serif;
+    font-weight: 300;
+    font-size: 10pt;
     text-align: center;
 }
 
-img#logo
-{
-    height: 128px;
-    width: 128px;
-}
