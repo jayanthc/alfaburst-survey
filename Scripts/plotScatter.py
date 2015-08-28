@@ -127,6 +127,11 @@ for f in files:
                                     bins=(numDMBins,numTimeBins),             \
                                     range=((DMMin,DMMax),(minMJD,maxMJD)),    \
                                     weights=data[:,2], normed=True)
+    # remove RFI; if >= 70% of DM bins in a time bin contains events, set all
+    # those to 0
+    for j in range(numTimeBins):
+        if len(np.where(hist[:,j] > 0)[0]) >= int(numDMBins * 0.70):
+            hist[:,j] = 0
     # extract x, y, hist of non-zero elements
     events = np.where(hist > 0)
     dm = events[0]
@@ -164,7 +169,9 @@ plt.xticks(ticks,                                                             \
                minMJD + (ticks * ((maxMJD - minMJD) / numTimeBins))))
 plt.xlim(0, numTimeBins)
 
-ticks, labels = plt.yticks()
+# use these ticks instead of the default ones
+yVals = np.array([0.0, 500.0, 1000.0, 1500.0, 2000.0, 2500.0])
+ticks = numDMBins * yVals / (DMMax - DMMin)
 plt.yticks(ticks,                                                             \
            map(lambda val: r"$%4.0f$" % val,                                  \
                ticks * ((DMMax - DMMin) / numDMBins)))
@@ -184,7 +191,7 @@ height = logo.size[1]
 # convert to float values between 0 and 1
 logo = np.array(logo).astype(np.float) / 255
 
-fig.figimage(logo, 2 * fig.bbox.xmax, 2 * fig.bbox.ymax - 150, zorder=1)
+fig.figimage(logo, 2 * fig.bbox.xmax - 10, 2 * fig.bbox.ymax - 150, zorder=1)
 
 # build filename
 fileImg = "AllBeams_D" + date + "T" + time + ".png"

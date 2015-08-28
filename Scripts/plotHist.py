@@ -117,6 +117,11 @@ for f in files:
                                     bins=(numDMBins,numTimeBins),             \
                                     range=((DMMin,DMMax),(minMJD,maxMJD)),    \
                                     weights=data[:,2])
+    # remove RFI; if >= 70% of DM bins in a time bin contains events, set all
+    # those to 0
+    for i in range(numTimeBins):
+        if len(np.where(hist[:,i] > 0)[0]) >= int(numDMBins * 0.70):
+            hist[:,i] = 0
     histSum += hist
 
 # initialize TeX stuff
