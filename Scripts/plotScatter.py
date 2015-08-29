@@ -177,8 +177,12 @@ plt.yticks(ticks,                                                             \
                ticks * ((DMMax - DMMin) / numDMBins)))
 plt.ylim(0, numDMBins)
 
-plt.legend(plotLabels, loc="upper left", fontsize=fontSize,                   \
-           bbox_to_anchor=(1.0, 0.8), scatterpoints=1, frameon=False)
+legend = plt.legend(plotLabels, loc="upper left", fontsize=fontSize,          \
+                    bbox_to_anchor=(1.0, 0.8), scatterpoints=1, frameon=False)
+# set the legend key size manually to make them equal for all beams
+for j in range(i):
+    legend.legendHandles[j]._sizes = [40]
+
 plt.title(r"${\rm %s:%s}$" % (date, time))
 plt.xlabel(r"${\rm LST}$")
 plt.ylabel(r"${\rm DM~(cm}^{-3}{\rm~pc)}$")
