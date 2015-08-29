@@ -12,6 +12,7 @@ import matplotlib as mp
 mp.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.animation as ma
+import Image
 
 def texInit(fontsize):
     # set plotting font properties
@@ -38,9 +39,11 @@ def animate(frame):
     size = 2 * (hist[frame][hist[frame] > 0] + 10 + (beamScale * numBeams)    \
                 - (beamScale * beamID))
     col = cmap(beamID * 255 / numBeams)
+    # this should be a list for legend to work
+    plotLabel = [r"${\rm Beam~%d}$" % beamID]
     # clear axes before plotting
     plt.cla()
-    plt.scatter(lst, dm, s=size, c=col)
+    plt.scatter(lst, dm, s=size, c=col, label=plotLabel)
 
     ticks = numTimeBins * (xVals - minMJD) / (maxMJD - minMJD)
     plt.xticks(ticks,                                                         \
@@ -56,7 +59,13 @@ def animate(frame):
                    ticks * ((DMMax - DMMin) / numDMBins)))
     plt.ylim(0, numDMBins)
 
-    plt.title(r"${\rm %s:%s~Beam~%s}$" % (date, time, beams[frame]))
+    legend = plt.legend(plotLabel, loc="upper left", fontsize=fontSize,       \
+                        bbox_to_anchor=(1.0, 0.75), scatterpoints=1,          \
+                        frameon=False)
+    # set the legend key size manually to make them equal for all beams
+    legend.legendHandles[0]._sizes = [40]
+
+    plt.title(r"${\rm %s:%s}$" % (date, time))
     plt.xlabel(r"${\rm LST}$")
     plt.ylabel(r"${\rm DM~(cm}^{-3}{\rm~pc)}$")
 
@@ -141,6 +150,8 @@ numDMBins = int(np.ceil((DMMax - DMMin) / DMBinWidth))
 
 # set up a large figure (16 inches x 9 inches)
 fig = plt.figure(figsize=(16.0, 9.0))
+# set the axes: Left, bottom, width, height
+plt.axes([0.075, 0.10, 0.75, 0.825])
 
 cmap = plt.get_cmap("jet")
 
@@ -153,11 +164,11 @@ i = 0
 beams = []
 for f in files:
     print "Processing %s..." % f
+    # generate beam ID array to be used for plot title
+    beams.append(f[4])
     # read the file; data is [MJD, DM, S/N, smoothing width]; ndmin=2 ensures
     # that files with a single event are handled properly
     data = np.loadtxt(f, dtype=float, delimiter=",", comments="#", ndmin=2)
-    # generate beam ID array to be used for plot title
-    beams.append(f[4])
     # 2D-bin the axis ranges
     hist[i], ybe, xbe = np.histogram2d(data[:,1], data[:,0],                  \
                                        bins=(numDMBins,numTimeBins),          \
@@ -183,6 +194,17 @@ date = files[0][10:18]
 time = files[0][19:25]
 
 anim = ma.FuncAnimation(fig, animate, frames=numFiles)
+
+# import ALFABURST logo
+logo = Image.open("/home/artemis/Survey/Images/alfaburst_logowithtext.png")
+width = logo.size[0]
+height = logo.size[1]
+
+# convert to float values between 0 and 1
+logo = np.array(logo).astype(np.float) / 255
+
+fig.figimage(logo, 2 * fig.bbox.xmax + 60, 2 * fig.bbox.ymax - 150, zorder=1)
+
 # build filename
 fileImg = "AllBeams_D" + date + "T" + time + ".gif"
 # use a high DPI for high resolution
