@@ -67,13 +67,13 @@ for i in 0...NumComputeNodes
   if dryRun
     print cmd, "\n"
   else
-    %x[#{cmd} 2> /dev/null]
+    %x[#{cmd} > /dev/null 2>&1]
   end
   cmd = "ssh artemis@abc#{i} 'cd /data/Survey/abc#{i}/; find . -size 103c -exec rm -f {} \\;'"
   if dryRun
     print cmd, "\n"
   else
-    %x[#{cmd} 2> /dev/null]
+    %x[#{cmd} > /dev/null 2>&1]
   end
 end
 
@@ -97,7 +97,7 @@ for i in 0...NumComputeNodes
     if dryRun
       print cmd, "\n"
     else
-      %x[#{cmd} 2> /dev/null]
+      %x[#{cmd} > /dev/null 2>&1]
     end
   end
   # copy today morning's data
@@ -106,24 +106,24 @@ for i in 0...NumComputeNodes
     if dryRun
       print cmd, "\n"
     else
-      %x[#{cmd} 2> /dev/null]
+      %x[#{cmd} > /dev/null 2>&1]
     end
   end
 end
 
 # check if there are files to process, if not exit
-numFiles = (%x[ls *.dat | wc -l]).to_i
+numFiles = (%x[ls #{LatestDataDir}/*.dat | wc -l]).to_i
 if 0 == numFiles
     %x[echo "No files." >> #{PlotsDir}/#{today}.log]
     exit
 end
 
 # remove bad lines
-cmd = "ls *.dat | xargs -n 1 #{ScriptsDir}/removeBadLines.rb"
+cmd = "ls #{LatestDataDir}/*.dat | xargs -n 1 #{ScriptsDir}/removeBadLines.rb"
 if dryRun
   print cmd, "\n"
 else
-  %x[#{cmd} 2> /dev/null]
+  %x[#{cmd} > /dev/null 2>&1]
 end
 
 # find unique epochs by extracting the hour and minute, and create globs
@@ -138,20 +138,20 @@ epochGlobs = %x[#{cmd}]
 
 # generate a plot per epoch
 epochGlobs.each_line do |epochGlob|
-  cmd = "#{ScriptsDir}/plotScatter.py #{epochGlob.strip()}"
+  cmd = "#{ScriptsDir}/plotScatterGIF.py #{epochGlob.strip()}"
   if dryRun
     print cmd, "\n"
   else
-    %x[#{cmd} >> #{PlotsDir}/#{today}.log 2>&1]
+    %x[#{cmd} >> #{PlotsDir}/#{today}.plotScatterGIF.log 2>&1]
   end
 end
 
 # move plots to plots directory
-cmd = "mv #{LatestDataDir}/*png #{PlotsDir}"
+cmd = "mv #{LatestDataDir}/*gif #{PlotsDir}"
 if dryRun
   print cmd, "\n"
 else
-  %x[#{cmd} 2> /dev/null]
+  %x[#{cmd} > /dev/null 2>&1]
 end
 
 # remove data files from the latest data directory
@@ -159,6 +159,14 @@ cmd = "rm -f #{LatestDataDir}/*dat"
 if dryRun
   print cmd, "\n"
 else
-  %x[#{cmd} 2> /dev/null]
+  %x[#{cmd} > /dev/null 2>&1]
+end
+
+# generate web pages
+cmd = "#{ScriptsDir}/generatePages.rb"
+if dryRun
+  print cmd, "\n"
+else
+  %x[#{cmd} > /dev/null 2>&1]
 end
 
