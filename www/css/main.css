@@ -1,3 +1,8 @@
+/*
+ * main.css
+ * Stylesheet for the ALFABURST FRB monitor web page.
+ */
+
 body
 {
     background-color: #FFFFFF;
@@ -70,6 +75,17 @@ header span#heading
     font-size: 24pt;
 }
 
+header span#timestamp
+{
+    position: fixed;
+    right: 4px;
+    top: 80px;
+    color: #FFFFFF;
+    font-family: "Open Sans Condensed", Arial, sans-serif;
+    font-weight; 300;
+    font-size: 10pt;
+}
+
 article h2
 {
     position: relative;
@@ -85,9 +101,20 @@ article section
     position: relative;
     top: 120px;
     text-align: center;
+    width: 100%;
 }
 
-article section img
+article section table
+{
+    width: 100%;
+}
+
+article section table tr td
+{
+    width: 50%;
+}
+
+article section table tr td img
 {
     width: 1000px;
 }
