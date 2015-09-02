@@ -9,7 +9,6 @@ import getopt
 import numpy as np
 import ephem
 import matplotlib as mp
-import matplotlib.pyplot as plt
 import Image
 
 def texInit(fontsize):
@@ -39,6 +38,10 @@ def PrintUsage(ProgName):
     print "Usage: " + ProgName + " [options] <input-files>"
     print "    -h  --help                           ",                        \
           "Display this usage information"
+    print "    -r  --dont-remove-rfi                ",                        \
+          "Do not remove RFI"
+    print "    -l  --no-logo                        ",                        \
+          "Do not use logo"
     print "    -s  --plot-to-screen                 ",                        \
           "Plot to screen"
     print "                                         ",                        \
@@ -94,6 +97,8 @@ numFiles = len(sys.argv) - optind
 
 if not PlotToScreen:
     mp.use("Agg")
+# pyplot should be imported after backend selection
+import matplotlib.pyplot as plt
 
 # loop through input files and find the minimum and maximum MJD
 minMJD = 100000.0
@@ -143,10 +148,13 @@ for f in files:
         for j in range(numTimeBins):
             if len(np.where(hist[:,j] > 0)[0]) >= int(numDMBins * 0.70):
                 hist[:,j] = 0
-    # extract x, y, hist of non-zero elements
+    # extract x, y of non-zero elements
     events = np.where(hist > 0)
     dm = events[0]
     lst = events[1]
+    # no need to make a plot if there are no events left
+    if 0 == len(dm):
+        continue
     # shift the values up and scale them appropriately for better plotting
     size = 2 * (hist[hist > 0] + 10 + (beamScale * numBeams)                  \
                 - (beamScale * beamID))
@@ -162,12 +170,6 @@ texInit(fontSize)
 
 # calculate aspect ratio based on the number of bins used
 aspect = float(numTimeBins) / (2 * numDMBins)
-# use the S/N threshold of the survey
-vmax = 10
-if np.min(histSum) > vmax:
-    # if the observation is completely washed out (no 0 pixels), do this to
-    # make sure plotting doesn't fail
-    vmax = np.min(histSum)
 
 # get date
 date = files[0][10:18]

@@ -9,7 +9,6 @@ import getopt
 import numpy as np
 import ephem
 import matplotlib as mp
-import matplotlib.pyplot as plt
 import matplotlib.animation as ma
 import Image
 
@@ -30,6 +29,9 @@ def animate(frame):
     events = np.where(hist[frame] > 0)
     dm = events[0]
     lst = events[1]
+    # no need to make a plot if there are no events left
+    if 0 == len(dm):
+        return
 
     numBeams = 7
     beamScale = 3
@@ -84,6 +86,10 @@ def PrintUsage(ProgName):
     print "Usage: " + ProgName + " [options] <input-files>"
     print "    -h  --help                           ",                        \
           "Display this usage information"
+    print "    -r  --dont-remove-rfi                ",                        \
+          "Do not remove RFI"
+    print "    -l  --no-logo                        ",                        \
+          "Do not use logo"
     print "    -s  --plot-to-screen                 ",                        \
           "Plot to screen"
     print "                                         ",                        \
@@ -139,6 +145,8 @@ numFiles = len(sys.argv) - optind
 
 if not PlotToScreen:
     mp.use("Agg")
+# pyplot should be imported after backend selection
+import matplotlib.pyplot as plt
 
 # loop through input files and find the minimum and maximum MJD
 minMJD = 100000.0
@@ -174,8 +182,6 @@ i = 0
 beams = []
 for f in files:
     print "Processing %s..." % f
-    # generate beam ID array to be used for plot title
-    beams.append(f[4])
     # read the file; data is [MJD, DM, S/N, smoothing width]; ndmin=2 ensures
     # that files with a single event are handled properly
     data = np.loadtxt(f, dtype=float, delimiter=",", comments="#", ndmin=2)
@@ -190,6 +196,14 @@ for f in files:
         for j in range(numTimeBins):
             if len(np.where(hist[i][:,j] > 0)[0]) >= int(numDMBins * 0.70):
                 hist[i][:,j] = 0
+    # extract dm of non-zero elements
+    events = np.where(hist[i] > 0)
+    dm = events[0]
+    # no need to make a plot if there are no events left
+    if 0 == len(dm):
+        continue
+    # generate beam ID array to be used for plot title
+    beams.append(f[4])
     i += 1
 
 # initialize TeX stuff
@@ -204,7 +218,7 @@ date = files[0][10:18]
 # get time
 time = files[0][19:25]
 
-anim = ma.FuncAnimation(fig, animate, frames=numFiles)
+anim = ma.FuncAnimation(fig, animate, frames=i)
 
 if not NoLogo:
     # import ALFABURST logo

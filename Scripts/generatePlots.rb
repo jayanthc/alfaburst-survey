@@ -20,6 +20,8 @@ Usage: #{progName} [options]
     -h  --help                           Display this usage information
     -n  --nodryrun                       Do a non-dry-run
                                          (default is dry run)
+    -p  --png                            Generate PNG images
+                                         (default is GIF)
     -d  --date <date>                    Start at this date instead of today
                                          (in the form YYYYMMDD)
   EOF
@@ -29,11 +31,14 @@ end
 opts = GetoptLong.new(
   [ "--help",       "-h", GetoptLong::NO_ARGUMENT ],
   [ "--nodryrun",   "-n", GetoptLong::NO_ARGUMENT ],
+  [ "--png",        "-p", GetoptLong::NO_ARGUMENT ],
   [ "--date",       "-d", GetoptLong::REQUIRED_ARGUMENT ]
 )
 
 # dry run flag
 dryRun = true
+# PNG flag
+makePNG = false
 # today's date and time
 today = nil
 timeNow = nil
@@ -46,6 +51,9 @@ opts.each do |opt, arg|
     when "--nodryrun"
       # set the dry run flag to false
       dryRun = false
+    when "--png"
+      # set the PNG flag to true
+      makePNG = true
     when "--date"
       today = arg
       # NOTE: the date is assumed to be of the form YYYYMMDD, without any
@@ -138,16 +146,24 @@ epochGlobs = %x[#{cmd}]
 
 # generate a plot per epoch
 epochGlobs.each_line do |epochGlob|
-  cmd = "#{ScriptsDir}/plotScatterGIF.py #{epochGlob.strip()}"
+  if makePNG
+    cmd = "#{ScriptsDir}/plotScatter.py #{epochGlob.strip()}"
+  else
+    cmd = "#{ScriptsDir}/plotScatterGIF.py #{epochGlob.strip()}"
+  end
   if dryRun
     print cmd, "\n"
   else
-    %x[#{cmd} >> #{PlotsDir}/#{today}.plotScatterGIF.log 2>&1]
+    %x[#{cmd} >> #{PlotsDir}/#{today}.log 2>&1]
   end
 end
 
 # move plots to plots directory
-cmd = "mv #{LatestDataDir}/*gif #{PlotsDir}"
+if makePNG
+  cmd = "mv #{LatestDataDir}/*png #{PlotsDir}"
+else
+  cmd = "mv #{LatestDataDir}/*gif #{PlotsDir}"
+end
 if dryRun
   print cmd, "\n"
 else
