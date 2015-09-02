@@ -9,7 +9,6 @@ import getopt
 import numpy as np
 import ephem
 import matplotlib as mp
-mp.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.animation as ma
 import Image
@@ -93,6 +92,8 @@ def PrintUsage(ProgName):
 
 
 # default values
+DontRemoveRFI = False           # dont-remove-rfi flag
+NoLogo = False                  # no-logo flag
 PlotToScreen = False            # plot-to-screen flag
 DMMin = 0.0                     # cm^-3 pc
 DMMax = 2560.0                  # cm^-3 pc
@@ -102,8 +103,8 @@ SecondsPerDay = 86400.0         # seconds
 
 # get the command line arguments
 ProgName = sys.argv[0]
-OptsShort = "hs"
-OptsLong = ["help", "plot-to-screen"]
+OptsShort = "hrls"
+OptsLong = ["help", "dont-remove-rfi", "no-logo", "plot-to-screen"]
 
 # get the arguments using the getopt module
 try:
@@ -120,6 +121,12 @@ for o, a in Opts:
     if o in ("-h", "--help"):
         PrintUsage(ProgName)
         sys.exit()
+    elif o in ("-r", "--dont-remove-rfi"):
+        DontRemoveRFI = True
+        optind = optind + 1
+    elif o in ("-l", "--no-logo"):
+        NoLogo = True
+        optind = optind + 1
     elif o in ("-s", "--plot-to-screen"):
         PlotToScreen = True
         optind = optind + 1
@@ -129,6 +136,9 @@ for o, a in Opts:
 
 # get number of files
 numFiles = len(sys.argv) - optind
+
+if not PlotToScreen:
+    mp.use("Agg")
 
 # loop through input files and find the minimum and maximum MJD
 minMJD = 100000.0
@@ -174,11 +184,12 @@ for f in files:
                                        bins=(numDMBins,numTimeBins),          \
                                        range=((DMMin,DMMax),(minMJD,maxMJD)), \
                                        weights=data[:,2], normed=True)
-    # remove RFI; if >= 70% of DM bins in a time bin contains events, set all
-    # those to 0
-    for j in range(numTimeBins):
-        if len(np.where(hist[i][:,j] > 0)[0]) >= int(numDMBins * 0.70):
-            hist[i][:,j] = 0
+    if not DontRemoveRFI:
+        # remove RFI; if >= 70% of DM bins in a time bin contains events, set
+        # all those to 0
+        for j in range(numTimeBins):
+            if len(np.where(hist[i][:,j] > 0)[0]) >= int(numDMBins * 0.70):
+                hist[i][:,j] = 0
     i += 1
 
 # initialize TeX stuff
@@ -195,18 +206,23 @@ time = files[0][19:25]
 
 anim = ma.FuncAnimation(fig, animate, frames=numFiles)
 
-# import ALFABURST logo
-logo = Image.open("/home/artemis/Survey/Images/alfaburst_logowithtext.png")
-width = logo.size[0]
-height = logo.size[1]
+if not NoLogo:
+    # import ALFABURST logo
+    logo = Image.open("/home/artemis/Survey/Images/alfaburst_logowithtext.png")
+    width = logo.size[0]
+    height = logo.size[1]
 
-# convert to float values between 0 and 1
-logo = np.array(logo).astype(np.float) / 255
+    # convert to float values between 0 and 1
+    logo = np.array(logo).astype(np.float) / 255
 
-fig.figimage(logo, 2 * fig.bbox.xmax + 60, 2 * fig.bbox.ymax - 150, zorder=1)
+    fig.figimage(logo, 3 * fig.bbox.xmax + 60, 2 * fig.bbox.ymax - 150,       \
+                 zorder=1)
 
-# build filename
-fileImg = "AllBeams_D" + date + "T" + time + ".gif"
-# use a high DPI for high resolution
-anim.save(fileImg, dpi=192, writer="imagemagick", fps=1)
+if PlotToScreen:
+    plt.show()
+else:
+    # build filename
+    fileImg = "AllBeams_D" + date + "T" + time + ".gif"
+    # use a high DPI for high resolution
+    anim.save(fileImg, dpi=192, writer="imagemagick", fps=1)
 
