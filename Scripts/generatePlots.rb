@@ -158,6 +158,26 @@ epochGlobs.each_line do |epochGlob|
   end
 end
 
+# check if there are files to process, if not exit
+if makePNG
+  cmd = "ls #{LatestDataDir}/*.png | wc -l"
+else
+  cmd = "ls #{LatestDataDir}/*.gif | wc -l"
+end
+numPlots = (%x[#{cmd}]).to_i
+if 0 == numPlots
+    %x[echo "No plots." >> #{PlotsDir}/#{today}.log]
+    exit
+end
+
+# generate web pages
+cmd = "#{ScriptsDir}/generatePages.rb"
+if dryRun
+  print cmd, "\n"
+else
+  %x[#{cmd} > /dev/null 2>&1]
+end
+
 # move plots to plots directory
 if makePNG
   cmd = "mv #{LatestDataDir}/*png #{PlotsDir}"
@@ -172,14 +192,6 @@ end
 
 # remove data files from the latest data directory
 cmd = "rm -f #{LatestDataDir}/*dat"
-if dryRun
-  print cmd, "\n"
-else
-  %x[#{cmd} > /dev/null 2>&1]
-end
-
-# generate web pages
-cmd = "#{ScriptsDir}/generatePages.rb"
 if dryRun
   print cmd, "\n"
 else

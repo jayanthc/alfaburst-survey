@@ -206,6 +206,11 @@ for f in files:
     beams.append(f[4])
     i += 1
 
+# the data is full of RFI
+if 0 == i:
+    print "Data is full of RFI. No plots will be generated."
+    sys.exit()
+
 # initialize TeX stuff
 fontSize = 16
 texInit(fontSize)
