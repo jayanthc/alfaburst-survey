@@ -198,9 +198,15 @@ for f in files:
     histSum += hist
     i += 1
 
+# TODO: check if this file is created on i = 0. if yes, delete it.
 if GenerateJS:
     # close JS file
     fileJS.close()
+
+# the data is full of RFI
+if 0 == i:
+    print "Data is full of RFI. No plots will be generated."
+    sys.exit()
 
 # initialize TeX stuff
 fontSize = 16
