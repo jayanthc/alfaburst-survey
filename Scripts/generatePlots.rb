@@ -68,16 +68,17 @@ NumComputeNodes = 4
 ScriptsDir = "/home/artemis/Survey/Scripts"
 PlotsDir = "/home/artemis/Survey/Plots"
 LatestDataDir = "/home/artemis/Survey/Data/Latest"
+ComputeNodeDataDir = "/data/Survey/Data"
 
 # remove empty files from compute nodes
 for i in 0...NumComputeNodes
-  cmd = "ssh artemis@abc#{i} 'cd /data/Survey/abc#{i}/; find . -size 0 -exec rm -f {} \\;'"
+  cmd = "ssh artemis@abc#{i} 'cd #{ComputeNodeDataDir}; find . -size 0 -exec rm -f {} \\;'"
   if dryRun
     print cmd, "\n"
   else
     %x[#{cmd} > /dev/null 2>&1]
   end
-  cmd = "ssh artemis@abc#{i} 'cd /data/Survey/abc#{i}/; find . -size 103c -exec rm -f {} \\;'"
+  cmd = "ssh artemis@abc#{i} 'cd #{ComputeNodeDataDir}; find . -size 103c -exec rm -f {} \\;'"
   if dryRun
     print cmd, "\n"
   else
@@ -101,7 +102,7 @@ end
 for i in 0...NumComputeNodes
   # copy last evening's data
   for j in 12..23
-    cmd = "ssh artemis@abc#{i} 'cd /data/Survey/abc#{i}/; cp -af Beam?_dm_D#{yesterday}T%02d*.dat #{LatestDataDir}'" % j
+    cmd = "ssh artemis@abc#{i} 'cd #{ComputeNodeDataDir}; cp -af Beam?_dm_D#{yesterday}T%02d*.dat #{LatestDataDir}'" % j
     if dryRun
       print cmd, "\n"
     else
@@ -110,7 +111,7 @@ for i in 0...NumComputeNodes
   end
   # copy today morning's data
   for j in 0..13
-    cmd = "ssh artemis@abc#{i} 'cd /data/Survey/abc#{i}/; cp -af Beam?_dm_D#{today}T%02d*.dat #{LatestDataDir}'" % j
+    cmd = "ssh artemis@abc#{i} 'cd #{ComputeNodeDataDir}; cp -af Beam?_dm_D#{today}T%02d*.dat #{LatestDataDir}'" % j
     if dryRun
       print cmd, "\n"
     else
