@@ -72,26 +72,29 @@ end
 
 # run yapp_viewmetadata to get the header size
 headerBytes = (%x[yapp_viewmetadata #{fileData} | tail -1 | cut -d ":" -f 2 | sed -e "s/^[ ]//"]).to_i
-puts headerBytes
 
 # run dd to copy the header to a temp file
-puts "dd if=#{fileData} of=#{TempHeaderFile} bs=#{headerBytes} count=1"
-#%x[dd if=#{fileData} of=#{TempHeaderFile} bs=#{headerBytes} count=1]
+cmd = "dd if=#{fileData} of=#{TempHeaderFile} bs=#{headerBytes} count=1"
+puts cmd
+%x[#{cmd}]
 
 # run dd to copy the data to a temp file
-dataBytes = (buffer - 1) * BufferBytes
-puts "dd if=#{fileData} of=#{TempDataFile} bs=1 count=#{dataBytes} skip=#{headerBytes}"
-#%x[dd if=#{fileData} of=#{TempDataFile} bs=1 count=#{dataBytes} skip=#{headerBytes}]
+skipBytes = headerBytes + (buffer - 1) * BufferBytes
+cmd = "dd if=#{fileData} of=#{TempDataFile} ibs=1 count=#{BufferBytes} obs=#{BufferBytes} skip=#{skipBytes}"
+puts cmd
+%x[#{cmd}]
 
 # build output file name
 # get file name without extension
 basename = File.basename(fileData, ".fil")
-# get directory in which file exists
-dirname = File.dirname(fileData)
 # build file name
-fileBuffer = dirname + basename + ".buffer#{buffer}.fil"
+fileBuffer = "./" + basename + ".buffer#{buffer}.fil"
 
 # combine the temp header and data files
-puts "cat #{TempHeaderFile} #{TempDataFile} > #{fileBuffer}"
-#%x[cat #{TempHeaderFile} #{TempDataFile} > #{fileBuffer}]
+cmd = "cat #{TempHeaderFile} #{TempDataFile} > #{fileBuffer}"
+puts cmd
+%x[#{cmd}]
+
+# remove the temp files
+%x[rm -f #{TempHeaderFile} #{TempDataFile}]
 
