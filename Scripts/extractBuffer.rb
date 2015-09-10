@@ -34,6 +34,12 @@ mjd = 0.0
 
 # constants
 ComputeNodeDataDir = "/data/Survey/Data"
+TempHeaderFile = "/data/Survey/Tmp/tempheader.fil"
+TempDataFile = "/data/Survey/Tmp/tempdata.fil"
+NumSamples = 32768
+NumChans = 512
+NumBytesPerSample = 4
+BufferBytes = NumSamples * NumChans * NumBytesPerSample
 
 opts.each do |opt, arg|
   case opt
@@ -64,71 +70,31 @@ if $?.exitstatus != 0
     exit
 end
 
+# run yapp_viewmetadata to get the header size
+headerBytes = (%x[yapp_viewmetadata #{fileData} | tail -1 | cut -d ":" -f 2 | sed -e "s/^[ ]//"]).to_i
+
+# run dd to copy the header to a temp file
+cmd = "dd if=#{fileData} of=#{TempHeaderFile} bs=#{headerBytes} count=1"
+puts cmd
+%x[#{cmd}]
+
 # run dd to copy the data to a temp file
-%x[dd if=#{fileData} of=#{tempData} bs=1 count=#{dataBytes} skip=#{headerBytes}]
+skipBytes = headerBytes + (buffer - 1) * BufferBytes
+cmd = "dd if=#{fileData} of=#{TempDataFile} ibs=1 count=#{BufferBytes} obs=#{BufferBytes} skip=#{skipBytes}"
+puts cmd
+%x[#{cmd}]
 
-__END__
-# find unique epochs by extracting the hour and minute, and create globs
-# NOTE: this is not a perfect glob, but it will work because we restrict
-# ourselves to a 24-hour window
-cmd = "ls *.dat | cut -b 20,21,22,23 | sort -n | uniq | sed 's/^/Beam?_dm_D*T/' | sed 's/$/*.dat/'"
-if dryRun
-  print cmd, "\n"
-end
-# this needs to be done for the loop below
-epochGlobs = %x[#{cmd}]
+# build output file name
+# get file name without extension
+basename = File.basename(fileData, ".fil")
+# build file name
+fileBuffer = "./" + basename + ".buffer#{buffer}.fil"
 
-# generate a plot per epoch
-epochGlobs.each_line do |epochGlob|
-  if makePNG
-    cmd = "#{ScriptsDir}/plotScatter.py #{epochGlob.strip()}"
-  else
-    cmd = "#{ScriptsDir}/plotScatterGIF.py #{epochGlob.strip()}"
-  end
-  if dryRun
-    print cmd, "\n"
-  else
-    %x[#{cmd} >> #{PlotsDir}/#{today}.log 2>&1]
-  end
-end
+# combine the temp header and data files
+cmd = "cat #{TempHeaderFile} #{TempDataFile} > #{fileBuffer}"
+puts cmd
+%x[#{cmd}]
 
-# check if there are files to process, if not exit
-if makePNG
-  cmd = "ls #{LatestDataDir}/*.png | wc -l"
-else
-  cmd = "ls #{LatestDataDir}/*.gif | wc -l"
-end
-numPlots = (%x[#{cmd}]).to_i
-if 0 == numPlots
-    %x[echo "No plots." >> #{PlotsDir}/#{today}.log]
-    exit
-end
-
-# generate web pages
-cmd = "#{ScriptsDir}/generatePages.rb"
-if dryRun
-  print cmd, "\n"
-else
-  %x[#{cmd} > /dev/null 2>&1]
-end
-
-# move plots to plots directory
-if makePNG
-  cmd = "mv #{LatestDataDir}/*png #{PlotsDir}"
-else
-  cmd = "mv #{LatestDataDir}/*gif #{PlotsDir}"
-end
-if dryRun
-  print cmd, "\n"
-else
-  %x[#{cmd} > /dev/null 2>&1]
-end
-
-# remove data files from the latest data directory
-cmd = "rm -f #{LatestDataDir}/*dat"
-if dryRun
-  print cmd, "\n"
-else
-  %x[#{cmd} > /dev/null 2>&1]
-end
+# remove the temp files
+%x[rm -f #{TempHeaderFile} #{TempDataFile}]
 
