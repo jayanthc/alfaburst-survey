@@ -3,44 +3,44 @@
 
 <configuration version="1.0">
     <pipeline>
+        <buffers>
+           <SpectrumDataSetStokes>
+               <buffer maxSize="100000000" maxChunkSize="100000000"/>
+           </SpectrumDataSetStokes>
+        </buffers>
+
         <clients>
-            <ABDataClient>
-                <server host="127.0.0.1" port="15001" />
-                <data type="SpectrumDataSetStokes" adapter="ABDataAdapter" />
-            </ABDataClient>
+            <FileDataClient>
+                <data type="SpectrumDataSetStokes" adapter="SigprocAdapter" file="./Beam0_fb_D20150806T220504.fil"/>
+            </FileDataClient>
         </clients>
 
         <adapters>
-            <ABDataAdapter>
-                <spectrum packets="4" />
-                <packet channels="1024" samples="1" />
-                <blob channels="512" />
-                <samplingTime seconds="0.000128" />
-            </ABDataAdapter>
+            <SigprocAdapter>
+                <sampleSize bits="32"/>
+                <channels number="512" />
+                <samplesPerRead number="1024" />
+            </SigprocAdapter>
         </adapters>
 
         <pipelineConfig>
-            <ABPipeline>
+            <SigprocPipeline>
                 <history value="5120" />
                 <events min="2" max="100000"/>
-            </ABPipeline>
+            </SigprocPipeline>
         </pipelineConfig>
 
         <modules>
             <RFI_Clipper active="true" channelRejectionRMS="5.0" spectrumRejectionRMS="6.0">
                 <zeroDMing active="true" />
-                <BandPassData file="/home/artemis/Survey/Config/alfa.bp" />
+                <BandPassData file="/data/Survey/test/alfa.bp" />
                 <Band matching="true" />
                 <History maximum="10000" />
             </RFI_Clipper>
 
-            <StokesIntegrator>
-                <integrateTimeBins value="2" />
-                <integrateFrequencyChannels value="1" />
-            </StokesIntegrator>
-
             <DedispersionModule>
                 <timeBinsPerBufferPow2 value="15" />
+                <frequencyChannel1 MHz="1513.0"/>
                 <sampleTime seconds="0.000256"/>
                 <channelBandwidth MHz="-0.109375"/>
                 <dedispersionSamples value="2560" />
@@ -62,16 +62,17 @@
             </dataStreams>
             <streamers>
                 <DedispersionDataAnalysisOutput active="true">
-                    <file name="/data/Survey/Data/Beam5_dm" />
+                    <file name="/data/Survey/test/SiPB0_dm" />
                 </DedispersionDataAnalysisOutput>
                 <SigprocStokesWriter active="true" writeHeader="true">
                     <import file="/home/artemis/Survey/Config/common.xml"/>
-                    <beam id="5" />
+                    <beam id="0" />
+                    <frequencyChannel1 MHz="1513.0"/>
                     <foff value="-0.109375"/>
                     <tsamp value="0.000256" />
                     <dataBits value="32"/>
                     <subbandsPerPacket value="1"/>
-                    <file filepath="/data/Survey/Data/Beam5_fb" />
+                    <file filepath="/data/Survey/test/SiPB0_fb" />
                     <params telescope="Arecibo" nPolsToWrite="1"/>
                     <TelescopeID value="1"/>
                     <MachineID value="15"/>

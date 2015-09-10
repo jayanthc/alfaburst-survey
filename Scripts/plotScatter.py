@@ -120,6 +120,15 @@ for f in files:
     minMJD = np.fmin(np.min(data[:,0]), minMJD)
     maxMJD = np.fmax(np.max(data[:,0]), maxMJD)
 
+# if the duration is a minute or less (i.e., LO freq change caused restart), no
+# need to make plots, as the data is unusable
+# NOTE: adding an extra 10 s (= 70 s) to be sure that the cron job killed data
+# acquisition
+if maxMJD - minMJD <= (70.0 / 86400):
+    print "Unusable data due to LO frequency change. "                        \
+          "No plots will be generated."
+    sys.exit()
+
 # calculate number of time bins
 numTimeBins = int(np.ceil((maxMJD - minMJD) * SecondsPerDay / TimeBinWidth))
 # calculate number of DM bins

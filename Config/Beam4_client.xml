@@ -62,7 +62,7 @@
             </dataStreams>
             <streamers>
                 <DedispersionDataAnalysisOutput active="true">
-                    <file name="/data/Survey/abc2/Beam4_dm" />
+                    <file name="/data/Survey/Data/Beam4_dm" />
                 </DedispersionDataAnalysisOutput>
                 <SigprocStokesWriter active="true" writeHeader="true">
                     <import file="/home/artemis/Survey/Config/common.xml"/>
@@ -71,7 +71,7 @@
                     <tsamp value="0.000256" />
                     <dataBits value="32"/>
                     <subbandsPerPacket value="1"/>
-                    <file filepath="/data/Survey/abc2/Beam4_fb" />
+                    <file filepath="/data/Survey/Data/Beam4_fb" />
                     <params telescope="Arecibo" nPolsToWrite="1"/>
                     <TelescopeID value="1"/>
                     <MachineID value="15"/>
