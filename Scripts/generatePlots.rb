@@ -24,6 +24,7 @@ Usage: #{progName} [options]
                                          (default is GIF)
     -d  --date <date>                    Start at this date instead of today
                                          (in the form YYYYMMDD)
+    -v  --verbose                        Verbose mode
   EOF
 end
 
@@ -32,13 +33,16 @@ opts = GetoptLong.new(
   [ "--help",       "-h", GetoptLong::NO_ARGUMENT ],
   [ "--nodryrun",   "-n", GetoptLong::NO_ARGUMENT ],
   [ "--png",        "-p", GetoptLong::NO_ARGUMENT ],
-  [ "--date",       "-d", GetoptLong::REQUIRED_ARGUMENT ]
+  [ "--date",       "-d", GetoptLong::REQUIRED_ARGUMENT ],
+  [ "--verbose",    "-v", GetoptLong::NO_ARGUMENT ]
 )
 
 # dry run flag
 dryRun = true
 # PNG flag
 makePNG = false
+# verbose flag
+verbose = false
 # today's date and time
 today = nil
 timeNow = nil
@@ -60,6 +64,9 @@ opts.each do |opt, arg|
       # validation
       # set timeNow to be mid-day on the given day
       timeNow = Time.new(today[0..3].to_i, today[4..5].to_i, today[6..7].to_i, 12, 0, 0)
+    when "--verbose"
+      # set the verbose flag to true
+      verbose = true
   end
 end
 
@@ -70,18 +77,29 @@ PlotsDir = "/home/artemis/Survey/Plots"
 LatestDataDir = "/home/artemis/Survey/Data/Latest"
 ComputeNodeDataDir = "/data/Survey/Data"
 
+# remove any pre-existing data files from the latest data directory
+cmd = "rm -f #{LatestDataDir}/*dat"
+if dryRun or verbose
+  print cmd, "\n"
+end
+if not dryRun
+  %x[#{cmd} > /dev/null 2>&1]
+end
+
 # remove empty files from compute nodes
 for i in 0...NumComputeNodes
   cmd = "ssh artemis@abc#{i} 'cd #{ComputeNodeDataDir}; find . -size 0 -exec rm -f {} \\;'"
-  if dryRun
+  if dryRun or verbose
     print cmd, "\n"
-  else
+  end
+  if not dryRun
     %x[#{cmd} > /dev/null 2>&1]
   end
   cmd = "ssh artemis@abc#{i} 'cd #{ComputeNodeDataDir}; find . -size 103c -exec rm -f {} \\;'"
-  if dryRun
+  if dryRun or verbose
     print cmd, "\n"
-  else
+  end
+  if not dryRun
     %x[#{cmd} > /dev/null 2>&1]
   end
 end
@@ -94,7 +112,7 @@ if nil == today
 end
 # get yesterday string (ignore leap seconds)
 yesterday = (timeNow - 86400).strftime("%Y%m%d")
-if dryRun
+if dryRun or verbose
     print "Today is #{today}. Yesterday was #{yesterday}.\n"
 end
 
@@ -103,35 +121,44 @@ for i in 0...NumComputeNodes
   # copy last evening's data
   for j in 12..23
     cmd = "ssh artemis@abc#{i} 'cd #{ComputeNodeDataDir}; cp -af Beam?_dm_D#{yesterday}T%02d*.dat #{LatestDataDir}'" % j
-    if dryRun
+    if dryRun or verbose
       print cmd, "\n"
-    else
+    end
+    if not dryRun
       %x[#{cmd} > /dev/null 2>&1]
     end
   end
   # copy today morning's data
   for j in 0..13
     cmd = "ssh artemis@abc#{i} 'cd #{ComputeNodeDataDir}; cp -af Beam?_dm_D#{today}T%02d*.dat #{LatestDataDir}'" % j
-    if dryRun
+    if dryRun or verbose
       print cmd, "\n"
-    else
+    end
+    if not dryRun
       %x[#{cmd} > /dev/null 2>&1]
     end
   end
 end
 
 # check if there are files to process, if not exit
-numFiles = (%x[ls #{LatestDataDir}/*.dat | wc -l]).to_i
-if 0 == numFiles
+cmd = "ls #{LatestDataDir}/*.dat | wc -l"
+if dryRun or verbose
+  print cmd, "\n"
+end
+if not dryRun
+  numFiles = (%x[#{cmd}]).to_i
+  if 0 == numFiles
     %x[echo "No files." >> #{PlotsDir}/#{today}.log]
     exit
+  end
 end
 
 # remove bad lines
 cmd = "ls #{LatestDataDir}/*.dat | xargs -n 1 #{ScriptsDir}/removeBadLines.rb"
-if dryRun
+if dryRun or verbose
   print cmd, "\n"
-else
+end
+if not dryRun
   %x[#{cmd} > /dev/null 2>&1]
 end
 
@@ -139,7 +166,7 @@ end
 # NOTE: this is not a perfect glob, but it will work because we restrict
 # ourselves to a 24-hour window
 cmd = "ls *.dat | cut -b 20,21,22,23 | sort -n | uniq | sed 's/^/Beam?_dm_D*T/' | sed 's/$/*.dat/'"
-if dryRun
+if dryRun or verbose
   print cmd, "\n"
 end
 # this needs to be done for the loop below
@@ -152,9 +179,10 @@ epochGlobs.each_line do |epochGlob|
   else
     cmd = "#{ScriptsDir}/plotScatterGIF.py #{epochGlob.strip()}"
   end
-  if dryRun
+  if dryRun or verbose
     print cmd, "\n"
-  else
+  end
+  if not dryRun
     %x[#{cmd} >> #{PlotsDir}/#{today}.log 2>&1]
   end
 end
@@ -173,9 +201,10 @@ end
 
 # generate web pages
 cmd = "#{ScriptsDir}/generatePages.rb"
-if dryRun
+if dryRun or verbose
   print cmd, "\n"
-else
+end
+if not dryRun
   %x[#{cmd} > /dev/null 2>&1]
 end
 
@@ -185,17 +214,19 @@ if makePNG
 else
   cmd = "mv #{LatestDataDir}/*gif #{PlotsDir}"
 end
-if dryRun
+if dryRun or verbose
   print cmd, "\n"
-else
+end
+if not dryRun
   %x[#{cmd} > /dev/null 2>&1]
 end
 
 # remove data files from the latest data directory
 cmd = "rm -f #{LatestDataDir}/*dat"
-if dryRun
+if dryRun or verbose
   print cmd, "\n"
-else
+end
+if not dryRun
   %x[#{cmd} > /dev/null 2>&1]
 end
 
