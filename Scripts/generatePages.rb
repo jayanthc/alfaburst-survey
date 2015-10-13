@@ -13,6 +13,10 @@ STDOUT.flush
 indexPage = "/home/artemis/Survey/www/index.htm"
 indexPageERB = indexPage + ".erb"
 
+epochPageERB = "/home/artemis/Survey/www/epoch.htm.erb"
+epochPagePrefix = "/home/artemis/Survey/www/epoch"
+
+# generate index page
 timeNow = Time.now()
 dateString = timeNow.strftime("%Y-%m-%d")
 timeString = timeNow.strftime("%H:%M:%S")
@@ -27,6 +31,25 @@ result = renderer.result()
 
 File.open(indexPage, "w") do |f|
   f.write(result)
+end
+
+# generate epoch pages
+for plot in plots
+  # extract epoch from plot file
+  date = plot.split("D")[1].split("T")[0]
+  time = plot.split("T")[1].split(".")[0]
+  # build events file name
+  eventsFile = "events" + date + time + ".js"
+  # build epoch page name
+  epochPage = epochPagePrefix + date + time + ".htm"
+  # render page
+  strERB = File.read(epochPageERB)
+  renderer = ERB.new(strERB)
+  result = renderer.result()
+  # write out file
+  File.open(epochPage, "w") do |f|
+    f.write(result)
+  end
 end
 
 puts "DONE\n"
