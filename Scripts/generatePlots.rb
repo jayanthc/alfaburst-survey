@@ -165,7 +165,7 @@ end
 # find unique epochs by extracting the hour and minute, and create globs
 # NOTE: this is not a perfect glob, but it will work because we restrict
 # ourselves to a 24-hour window
-cmd = "ls *.dat | cut -b 20,21,22,23 | sort -n | uniq | sed 's/^/Beam?_dm_D*T/' | sed 's/$/*.dat/'"
+cmd = "ls #{LatestDataDir}/*.dat | cut -b 53,54,55,56 | sort -n | uniq | sed 's/^/Beam?_dm_D*T/' | sed 's/$/*.dat/'"
 if dryRun or verbose
   print cmd, "\n"
 end
@@ -175,9 +175,9 @@ epochGlobs = %x[#{cmd}]
 # generate a plot per epoch
 epochGlobs.each_line do |epochGlob|
   if makePNG
-    cmd = "#{ScriptsDir}/plotScatter.py #{epochGlob.strip()}"
+    cmd = "cd #{LatestDataDir}; #{ScriptsDir}/plotScatter.py #{LatestDataDir}/#{epochGlob.strip()}"
   else
-    cmd = "#{ScriptsDir}/plotScatterGIF.py #{epochGlob.strip()}"
+    cmd = "cd #{LatestDataDir}; #{ScriptsDir}/plotScatterGIF.py #{LatestDataDir}/#{epochGlob.strip()}"
   end
   if dryRun or verbose
     print cmd, "\n"
@@ -193,7 +193,13 @@ if makePNG
 else
   cmd = "ls #{LatestDataDir}/*.gif | wc -l"
 end
+if dryRun or verbose
+  print cmd, "\n"
+end
 numPlots = (%x[#{cmd}]).to_i
+if dryRun or verbose
+  print "Number of plots = #{numPlots}\n"
+end
 if 0 == numPlots
     %x[echo "No plots." >> #{PlotsDir}/#{today}.log]
     exit

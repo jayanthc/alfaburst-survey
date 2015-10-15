@@ -6,6 +6,7 @@
 
 import sys
 import getopt
+import os
 import numpy as np
 import ephem
 import matplotlib as mp
@@ -142,9 +143,9 @@ plt.axes([0.075, 0.10, 0.75, 0.825])
 cmap = plt.get_cmap("jet")
 
 # get date
-date = files[0][10:18]
+date = os.path.basename(files[0])[10:18]
 # get time
-time = files[0][19:25]
+time = os.path.basename(files[0])[19:25]
 
 if GenerateJS:
     # build filename
@@ -160,7 +161,7 @@ histSum = np.zeros((numDMBins, numTimeBins))
 i = 0
 for f in files:
     print "Processing %s..." % f
-    beamID = int(f[4])
+    beamID = int(os.path.basename(f)[4])
     # read the file; data is [MJD, DM, S/N, smoothing width]; ndmin=2 ensures
     # that files with a single event are handled properly
     data = np.loadtxt(f, dtype=float, delimiter=",", comments="#", ndmin=2)

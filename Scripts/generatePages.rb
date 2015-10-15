@@ -36,8 +36,8 @@ end
 # generate epoch pages
 for plot in plots
   # extract epoch from plot file
-  date = plot.split("D")[1].split("T")[0]
-  time = plot.split("T")[1].split(".")[0]
+  date = File.basename(plot).split("D")[1].split("T")[0]
+  time = File.basename(plot).split("T")[1].split(".")[0]
   # build events file name
   eventsFile = "events" + date + time + ".js"
   # build epoch page name

@@ -6,11 +6,13 @@
 
 import sys
 import getopt
+import os
 import numpy as np
 import ephem
 import matplotlib as mp
 import matplotlib.animation as ma
 import Image
+import json
 
 def texInit(fontsize):
     # set plotting font properties
@@ -86,7 +88,9 @@ def PrintUsage(ProgName):
     print "Usage: " + ProgName + " [options] <input-files>"
     print "    -h  --help                           ",                        \
           "Display this usage information"
-    print "    -r  --dont-remove-rfi                ",                        \
+    print "    -j  --no-js                          ",                        \
+          "Do not generate JavaScript variables"
+    print "    -r  --no-rfi-removal                 ",                        \
           "Do not remove RFI"
     print "    -l  --no-logo                        ",                        \
           "Do not use logo"
@@ -98,8 +102,9 @@ def PrintUsage(ProgName):
 
 
 # default values
-DontRemoveRFI = False           # dont-remove-rfi flag
-NoLogo = False                  # no-logo flag
+GenerateJS = True               # flag to not generate JavaScript variables
+RemoveRFI = True                # dont-remove-rfi flag
+UseLogo = True                  # no-logo flag
 PlotToScreen = False            # plot-to-screen flag
 DMMin = 0.0                     # cm^-3 pc
 DMMax = 2560.0                  # cm^-3 pc
@@ -109,8 +114,8 @@ SecondsPerDay = 86400.0         # seconds
 
 # get the command line arguments
 ProgName = sys.argv[0]
-OptsShort = "hrls"
-OptsLong = ["help", "dont-remove-rfi", "no-logo", "plot-to-screen"]
+OptsShort = "hjrls"
+OptsLong = ["help", "no-js", "no-rfi-removal", "no-logo", "plot-to-screen"]
 
 # get the arguments using the getopt module
 try:
@@ -127,11 +132,14 @@ for o, a in Opts:
     if o in ("-h", "--help"):
         PrintUsage(ProgName)
         sys.exit()
-    elif o in ("-r", "--dont-remove-rfi"):
-        DontRemoveRFI = True
+    elif o in ("-j", "--no-js"):
+        GenerateJS = False
+        optind = optind + 1
+    elif o in ("-r", "--no-rfi-removal"):
+        RemoveRFI = False
         optind = optind + 1
     elif o in ("-l", "--no-logo"):
-        NoLogo = True
+        UseLogo = False
         optind = optind + 1
     elif o in ("-s", "--plot-to-screen"):
         PlotToScreen = True
@@ -182,6 +190,17 @@ plt.axes([0.075, 0.10, 0.75, 0.825])
 
 cmap = plt.get_cmap("jet")
 
+# get date
+date = os.path.basename(files[0])[10:18]
+# get time
+time = os.path.basename(files[0])[19:25]
+
+if GenerateJS:
+    # build filename
+    filenameJS = "events" + date + time + ".js"
+    # open JS file
+    fileJS = open(filenameJS, "w")
+
 # set up the x-axis tick marks based on global (all-beam) range
 xVals = np.linspace(minMJD, maxMJD, 6)
 
@@ -199,7 +218,7 @@ for f in files:
                                        bins=(numDMBins,numTimeBins),          \
                                        range=((DMMin,DMMax),(minMJD,maxMJD)), \
                                        weights=data[:,2], normed=True)
-    if not DontRemoveRFI:
+    if RemoveRFI:
         # remove RFI; if >= 70% of DM bins in a time bin contains events, set
         # all those to 0
         for j in range(numTimeBins):
@@ -208,12 +227,34 @@ for f in files:
     # extract dm of non-zero elements
     events = np.where(hist[i] > 0)
     dm = events[0]
+    mjd = events[1]
     # no need to make a plot if there are no events left
     if 0 == len(dm):
         continue
     # generate beam ID array to be used for plot title
-    beams.append(f[4])
+    beams.append(os.path.basename(f)[4])
+    if GenerateJS:
+        # output extracted values to the JS file
+        # NOTE: assuming DM values are integers. if the DM step size (in the
+        # histogram output) is made non-integer, change this to np.round with
+        # appropriate number of decimal places
+        dmVals = (dm * ((DMMax - DMMin) / numDMBins)).astype(int)
+        beamID = int(beams[i])
+        # separators are explicity specified so that whitespace is not inserted
+        print >> fileJS, "var dm[\"" + str(beamID) + "\"]="                   \
+                         + json.dumps(dmVals.tolist(), separators=(",",":"))  \
+                         + ";"
+        mjdVals = minMJD + (mjd * ((maxMJD - minMJD) / numTimeBins))
+        # separators are explicity specified so that whitespace is not inserted
+        print >> fileJS, "var mjd[\"" + str(beamID) + "\"]="                  \
+                + json.dumps(mjdVals.tolist(), separators=(",",":"))          \
+                + ";"
     i += 1
+
+# TODO: check if this file is created on i = 0. if yes, delete it.
+if GenerateJS:
+    # close JS file
+    fileJS.close()
 
 # the data is full of RFI
 if 0 == i:
@@ -227,14 +268,9 @@ texInit(fontSize)
 # calculate aspect ratio based on the number of bins used
 aspect = float(numTimeBins) / (2 * numDMBins)
 
-# get date
-date = files[0][10:18]
-# get time
-time = files[0][19:25]
-
 anim = ma.FuncAnimation(fig, animate, frames=i)
 
-if not NoLogo:
+if UseLogo:
     # import ALFABURST logo
     logo = Image.open("/home/artemis/Survey/Images/alfaburst_logowithtext.png")
     width = logo.size[0]
