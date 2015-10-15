@@ -200,6 +200,9 @@ if GenerateJS:
     filenameJS = "events" + date + time + ".js"
     # open JS file
     fileJS = open(filenameJS, "w")
+    print >> fileJS, "var dm = {};"
+    print >> fileJS, "var mjd = {};"
+    print >> fileJS, "var nEvents = {};"
 
 # set up the x-axis tick marks based on global (all-beam) range
 xVals = np.linspace(minMJD, maxMJD, 6)
@@ -240,13 +243,15 @@ for f in files:
         # appropriate number of decimal places
         dmVals = (dm * ((DMMax - DMMin) / numDMBins)).astype(int)
         beamID = int(beams[i])
+        print >> fileJS, "nEvents[\"" + str(beamID) + "\"]=["                 \
+                         + str(len(dmVals)) + "];"
         # separators are explicity specified so that whitespace is not inserted
-        print >> fileJS, "var dm[\"" + str(beamID) + "\"]="                   \
+        print >> fileJS, "dm[\"" + str(beamID) + "\"]="                       \
                          + json.dumps(dmVals.tolist(), separators=(",",":"))  \
                          + ";"
         mjdVals = minMJD + (mjd * ((maxMJD - minMJD) / numTimeBins))
         # separators are explicity specified so that whitespace is not inserted
-        print >> fileJS, "var mjd[\"" + str(beamID) + "\"]="                  \
+        print >> fileJS, "mjd[\"" + str(beamID) + "\"]="                      \
                 + json.dumps(mjdVals.tolist(), separators=(",",":"))          \
                 + ";"
     i += 1

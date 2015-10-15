@@ -152,6 +152,9 @@ if GenerateJS:
     filenameJS = "events" + date + time + ".js"
     # open JS file
     fileJS = open(filenameJS, "w")
+    print >> fileJS, "var dm = {};"
+    print >> fileJS, "var mjd = {};"
+    print >> fileJS, "var nEvents = {};"
 
 # loop through input files and generate 2D histograms
 numBeams = 7
@@ -190,13 +193,15 @@ for f in files:
         # histogram output) is made non-integer, change this to np.round with
         # appropriate number of decimal places
         dmVals = (dm * ((DMMax - DMMin) / numDMBins)).astype(int)
+        print >> fileJS, "nEvents[\"" + str(beamID) + "\"]=["                 \
+                         + str(len(dmVals)) + "];"
         # separators are explicity specified so that whitespace is not inserted
-        print >> fileJS, "var dm[\"" + str(beamID) + "\"]="                   \
+        print >> fileJS, "dm[\"" + str(beamID) + "\"]="                       \
                          + json.dumps(dmVals.tolist(), separators=(",",":"))  \
                          + ";"
         mjdVals = minMJD + (mjd * ((maxMJD - minMJD) / numTimeBins))
         # separators are explicity specified so that whitespace is not inserted
-        print >> fileJS, "var mjd[\"" + str(beamID) + "\"]="                  \
+        print >> fileJS, "mjd[\"" + str(beamID) + "\"]="                      \
                 + json.dumps(mjdVals.tolist(), separators=(",",":"))          \
                 + ";"
     # shift the values up and scale them appropriately for better plotting
