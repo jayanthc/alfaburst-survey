@@ -104,6 +104,95 @@ article section
     width: 100%;
 }
 
+article section#chart
+{
+    position: absolute;
+    top: 130px;
+    left: 0px;
+    width: 80%;
+    height: 550px;
+}
+
+article section#params
+{
+    position: absolute;
+    top: 120px;
+    right: 0px;
+    width: 20%;
+}
+
+article section input#beam0
+{
+    position: absolute;
+    top: 60px;
+    right: 120px;
+}
+
+article section input#beam1
+{
+    position: absolute;
+    top: 40px;
+    right: 105px;
+}
+
+article section input#beam2
+{
+    position: absolute;
+    top: 60px;
+    right: 90px;
+}
+
+article section input#beam3
+{
+    position: absolute;
+    top: 80px;
+    right: 105px;
+}
+
+article section input#beam4
+{
+    position: absolute;
+    top: 80px;
+    right: 135px;
+}
+
+article section input#beam5
+{
+    position: absolute;
+    top: 60px;
+    right: 150px;
+}
+
+article section input#beam6
+{
+    position: absolute;
+    top: 40px;
+    right: 135px;
+}
+
+article section#tooltip
+{
+    position: absolute;
+    top: 110px;
+    height: 20px;
+    font-family: "Roboto", Arial, sans-serif;
+    font-weight; 300;
+    font-size: 10pt;
+}
+
+article section#status
+{
+    position: absolute;
+    width: 20%;
+    height: 20px;
+    text-align: center;
+    top: 240px;
+    right: 0px;
+    font-family: "Roboto", Arial, sans-serif;
+    font-weight; 300;
+    font-size: 10pt;
+}
+
 article section table
 {
     width: 100%;
