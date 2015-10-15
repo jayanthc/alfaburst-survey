@@ -6,3 +6,4 @@ Log/**
 Plots/**
 !Plots/.gitignore
 www/*.htm
+www/js/events*.js

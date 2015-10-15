@@ -10,10 +10,10 @@ require "erb"
 print "Generating HTML pages..."
 STDOUT.flush
 
+indexPageERB = "/home/artemis/Survey/www/templates/index.htm.erb"
 indexPage = "/home/artemis/Survey/www/index.htm"
-indexPageERB = indexPage + ".erb"
 
-epochPageERB = "/home/artemis/Survey/www/epoch.htm.erb"
+epochPageERB = "/home/artemis/Survey/www/templates/epoch.htm.erb"
 epochPagePrefix = "/home/artemis/Survey/www/epoch"
 
 # generate index page
@@ -38,8 +38,10 @@ for plot in plots
   # extract epoch from plot file
   date = File.basename(plot).split("D")[1].split("T")[0]
   time = File.basename(plot).split("T")[1].split(".")[0]
+  # define epoch
+  @epoch = date + " " + time
   # build events file name
-  eventsFile = "events" + date + time + ".js"
+  @eventsFile = "events" + date + time + ".js"
   # build epoch page name
   epochPage = epochPagePrefix + date + time + ".htm"
   # render page

@@ -73,6 +73,7 @@ end
 # constants
 NumComputeNodes = 4
 ScriptsDir = "/home/artemis/Survey/Scripts"
+JSDir = "/home/artemis/Survey/www/js"
 PlotsDir = "/home/artemis/Survey/Plots"
 LatestDataDir = "/home/artemis/Survey/Data/Latest"
 ComputeNodeDataDir = "/data/Survey/Data"
@@ -207,6 +208,15 @@ end
 
 # generate web pages
 cmd = "#{ScriptsDir}/generatePages.rb"
+if dryRun or verbose
+  print cmd, "\n"
+end
+if not dryRun
+  %x[#{cmd} > /dev/null 2>&1]
+end
+
+# move JS files to the js directory
+cmd = "mv #{LatestDataDir}/*js #{JSDir}"
 if dryRun or verbose
   print cmd, "\n"
 end
