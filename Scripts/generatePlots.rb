@@ -206,22 +206,51 @@ if 0 == numPlots
     exit
 end
 
-# generate web pages
-cmd = "#{ScriptsDir}/generatePages.rb"
-if dryRun or verbose
-  print cmd, "\n"
-end
-if not dryRun
-  %x[#{cmd} > /dev/null 2>&1]
-end
+if not makePNG
+  # scp JS files to the web server
+  cmd = "scp #{LatestDataDir}/*js alfafrb@maunabo:public_html/js/"
+  if dryRun or verbose
+    print cmd, "\n"
+  end
+  if not dryRun
+    %x[#{cmd} > /dev/null 2>&1]
+  end
 
-# move JS files to the js directory
-cmd = "mv #{LatestDataDir}/*js #{JSDir}"
-if dryRun or verbose
-  print cmd, "\n"
-end
-if not dryRun
-  %x[#{cmd} > /dev/null 2>&1]
+  # generate web pages
+  cmd = "#{ScriptsDir}/generatePages.rb"
+  if dryRun or verbose
+    print cmd, "\n"
+  end
+  if not dryRun
+    %x[#{cmd} > /dev/null 2>&1]
+  end
+
+  # scp web pages to the web server
+  cmd = "scp #{LatestDataDir}/*htm alfafrb@maunabo:public_html/"
+  if dryRun or verbose
+    print cmd, "\n"
+  end
+  if not dryRun
+    %x[#{cmd} > /dev/null 2>&1]
+  end
+
+  # remove web pages
+  cmd = "rm -f #{LatestDataDir}/*htm"
+  if dryRun or verbose
+    print cmd, "\n"
+  end
+  if not dryRun
+    %x[#{cmd} > /dev/null 2>&1]
+  end
+
+  # scp GIF images to the web server
+  cmd = "scp #{LatestDataDir}/*gif alfafrb@maunabo:public_html/"
+  if dryRun or verbose
+    print cmd, "\n"
+  end
+  if not dryRun
+    %x[#{cmd} > /dev/null 2>&1]
+  end
 end
 
 # move plots to plots directory
@@ -230,6 +259,16 @@ if makePNG
 else
   cmd = "mv #{LatestDataDir}/*gif #{PlotsDir}"
 end
+if dryRun or verbose
+  print cmd, "\n"
+end
+if not dryRun
+  %x[#{cmd} > /dev/null 2>&1]
+end
+
+# clean up
+# remove JS files
+cmd = "rm -f #{LatestDataDir}/*js"
 if dryRun or verbose
   print cmd, "\n"
 end

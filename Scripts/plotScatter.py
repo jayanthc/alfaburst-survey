@@ -149,7 +149,7 @@ time = os.path.basename(files[0])[19:25]
 
 if GenerateJS:
     # build filename
-    filenameJS = "events" + date + time + ".js"
+    filenameJS = "epoch" + date + time + ".js"
     # open JS file
     fileJS = open(filenameJS, "w")
     print >> fileJS, "var beamData = {};"
