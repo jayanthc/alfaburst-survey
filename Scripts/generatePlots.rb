@@ -206,7 +206,7 @@ if 0 == numPlots
     exit
 end
 
-if not makePNG
+if makePNG
   # scp JS files to the web server
   cmd = "scp #{LatestDataDir}/*js alfafrb@maunabo:public_html/js/"
   if dryRun or verbose

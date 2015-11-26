@@ -45,6 +45,8 @@ for plot in plots
   @eventsFile = "epoch" + date + time + ".js"
   # build epoch page name
   epochPage = epochPagePrefix + date + time + ".htm"
+  @epochFile = epochPage
+  print @epochFile
   # render page
   strERB = File.read(epochPageERB)
   renderer = ERB.new(strERB)
