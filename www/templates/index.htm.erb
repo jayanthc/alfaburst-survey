@@ -28,7 +28,7 @@
     <article>
       <section>
         <table><% @plots.each do |p| %>
-          <tr><td><img src="<%= p %>" alt="<%= p %>"></td></tr>
+          <tr><td><a href="<%= @epochFile %>"><img src="<%= p %>" alt="<%= p %>" /></a></td></tr>
         <% end %></table>
       </section>
     </article>
