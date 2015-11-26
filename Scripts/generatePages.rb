@@ -16,7 +16,6 @@ indexPage = "/home/artemis/Survey/Data/Latest/index.htm"
 epochPageERB = "/home/artemis/Survey/www/templates/epoch.htm.erb"
 epochPagePrefix = "/home/artemis/Survey/Data/Latest/epoch"
 
-# generate index page
 timeNow = Time.now()
 dateString = timeNow.strftime("%Y-%m-%d")
 timeString = timeNow.strftime("%H:%M:%S")
@@ -25,14 +24,7 @@ timeString = timeNow.strftime("%H:%M:%S")
 plots = Dir.glob("/home/artemis/Survey/Data/Latest/AllBeams_D*T*.png")
 @plots = []
 plots.size.times { |i| @plots << "images/" + File.basename(plots[i]) }
-
-strERB = File.read(indexPageERB)
-renderer = ERB.new(strERB)
-result = renderer.result()
-
-File.open(indexPage, "w") do |f|
-  f.write(result)
-end
+@numPlots = plots.length
 
 # generate epoch pages
 for plot in plots
@@ -45,8 +37,6 @@ for plot in plots
   @eventsFile = "epoch" + date + time + ".js"
   # build epoch page name
   epochPage = epochPagePrefix + date + time + ".htm"
-  @epochFile = epochPage
-  print @epochFile
   # render page
   strERB = File.read(epochPageERB)
   renderer = ERB.new(strERB)
@@ -55,6 +45,19 @@ for plot in plots
   File.open(epochPage, "w") do |f|
     f.write(result)
   end
+end
+
+epochFiles = Dir.glob("/home/artemis/Survey/Data/Latest/epoch*.htm")
+@epochFiles = []
+epochFiles.size.times { |i| @epochFiles << File.basename(epochFiles[i]) }
+
+# generate index page
+strERB = File.read(indexPageERB)
+renderer = ERB.new(strERB)
+result = renderer.result()
+
+File.open(indexPage, "w") do |f|
+  f.write(result)
 end
 
 puts "DONE\n"

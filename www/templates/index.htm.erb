@@ -27,8 +27,8 @@
     </header>
     <article>
       <section>
-        <table><% @plots.each do |p| %>
-          <tr><td><a href="<%= @epochFile %>"><img src="<%= p %>" alt="<%= p %>" /></a></td></tr>
+        <table><% for i in 0...@numPlots do %>
+          <tr><td><a href="<%= @epochFiles[i] %>"><img src="<%= @plots[i] %>" alt="<%= @plots[i] %>" /></a></td></tr>
         <% end %></table>
       </section>
     </article>
