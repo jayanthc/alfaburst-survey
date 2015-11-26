@@ -179,7 +179,8 @@ function plot() {
                                yExtremes.dataMax);
     chart.hideLoading();
     /* set status message */
-    $("#status").html(numPoints + " events in all beams.");
+    numBeams = retSel.data.length;
+    $("#status").html(numPoints + " events in " + numBeams + " beams.");
     /* reset selection if all pulsars plotted successfully */
     for (var i = 0; i < selCount; ++i) {
         selEvents[i] = null;
@@ -221,11 +222,18 @@ function scatterize(x, y) {
     return plotData;
 }
 function toggleBeam(tag) {
-    var series = chart.series[parseInt(tag.value)]
-    if (series.visible) {
-        series.hide();
-    } else {
-        series.show();
+    var beamID = parseInt(tag.value);
+    /* get the appropriate series */
+    for (var i = 0; i < chart.series.length; ++i) {
+        var series = chart.series[i]
+        if (parseInt(series.name[5]) == beamID) {
+            if (series.visible) {
+                series.hide();
+            } else {
+                series.show();
+            }
+            break;
+        }
     }
 }
 
