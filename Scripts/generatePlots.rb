@@ -243,8 +243,8 @@ if not makePNG
     %x[#{cmd} > /dev/null 2>&1]
   end
 
-  # scp GIF images to the web server
-  cmd = "scp #{LatestDataDir}/*gif alfafrb@maunabo:public_html/"
+  # scp images to the web server
+  cmd = "scp #{LatestDataDir}/*png alfafrb@maunabo:public_html/images/"
   if dryRun or verbose
     print cmd, "\n"
   end

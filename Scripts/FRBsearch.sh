@@ -25,6 +25,7 @@ function observe {
     wait $pidabc2
     wait $pidabc3
 }
+
 function checkFlag {
     Flag=$(cat $flagfile)
     while [ $Flag -eq 2 ]; do
@@ -38,7 +39,6 @@ function endGracefully {
     echo "Stopping survey on:" `date`>> /home/artemis/Survey/Log/Obs.log
     echo "-" >> /home/artemis/Survey/Log/Obs.log
 }
-
 
 while [ -f /home/artemis/Survey/Flags/ALFABURST.FLAG ]; do
     echo ALFABURST is running
