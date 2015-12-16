@@ -150,6 +150,16 @@ if not dryRun
   numFiles = (%x[#{cmd}]).to_i
   if 0 == numFiles
     %x[echo "No files." >> #{PlotsDir}/#{today}.log]
+
+    # clean up
+    cmd = "rm -f #{LatestDataDir}/*dat"
+    if dryRun or verbose
+      print cmd, "\n"
+    end
+    if not dryRun
+      %x[#{cmd} > /dev/null 2>&1]
+    end
+
     exit
   end
 end
@@ -176,9 +186,9 @@ epochGlobs = %x[#{cmd}]
 # generate a plot per epoch
 epochGlobs.each_line do |epochGlob|
   if makePNG
-    cmd = "cd #{LatestDataDir}; #{ScriptsDir}/plotScatter.py #{LatestDataDir}/#{epochGlob.strip()}"
+    cmd = "cd #{LatestDataDir}; #{ScriptsDir}/plotScatter.py -r #{LatestDataDir}/#{epochGlob.strip()}"
   else
-    cmd = "cd #{LatestDataDir}; #{ScriptsDir}/plotScatterGIF.py #{LatestDataDir}/#{epochGlob.strip()}"
+    cmd = "cd #{LatestDataDir}; #{ScriptsDir}/plotScatterGIF.py -r #{LatestDataDir}/#{epochGlob.strip()}"
   end
   if dryRun or verbose
     print cmd, "\n"
@@ -203,6 +213,16 @@ if dryRun or verbose
 end
 if 0 == numPlots
     %x[echo "No plots." >> #{PlotsDir}/#{today}.log]
+
+    # remove data files from the latest data directory
+    cmd = "rm -f #{LatestDataDir}/*dat"
+    if dryRun or verbose
+      print cmd, "\n"
+    end
+    if not dryRun
+      %x[#{cmd} > /dev/null 2>&1]
+    end
+
     exit
 end
 

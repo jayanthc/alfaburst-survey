@@ -43,7 +43,7 @@
                 <timeBinsPerBufferPow2 value="15" />
                 <sampleTime seconds="0.000256"/>
                 <channelBandwidth MHz="-0.109375"/>
-                <dedispersionSamples value="2560" />
+                <dedispersionSamples value="10040" />
                 <dedispersionStepSize value="1.0" />
                 <dedispersionMinimum value="0.0" />
                 <numberOfBuffers value="5" />

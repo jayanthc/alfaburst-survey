@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+    <server>
+        <tx host="127.0.0.1" port="15001" />
+
+        <buffers>
+            <SpectrumDataSetStokes>
+                <buffer maxSize="10000000000" maxChunkSize="1049600" />
+            </SpectrumDataSetStokes>
+        </buffers>
+
+        <chunkers>
+            <ABChunker>
+                <connection host="10.10.10.42" port="16705" />
+                <packet size="8200" header="8" footer="8"/>
+                <spectrum packets="4" />
+                <data type="SpectrumDataSetStokes" chunkSize="1049600" />
+            </ABChunker>
+        </chunkers>
+    </server>
+</configuration>
+

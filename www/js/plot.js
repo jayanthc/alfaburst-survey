@@ -122,7 +122,9 @@ var optionsScatter = {
                         selEvents[selCount++] = this.eventIdx;
                     }
                 }
-            }
+            },
+            /* for series longer than 1000 points */
+            turboThreshold: 100000
         }
     },
     tooltip: {

@@ -165,7 +165,7 @@ plt.ylabel('DM pc/cm^3')
     
 lims = plt.ylim()
 #plt.ylim([-9, lims[1]])
-plt.ylim([-10, 2570])
+plt.ylim([-10, 10050])
 # rotate and align the tick labels so they look better
 fig.autofmt_xdate()
             

@@ -78,7 +78,7 @@ def PrintUsage(ProgName):
 # default values
 PlotToScreen = False            # plot-to-screen flag
 DMMin = 0.0                     # cm^-3 pc
-DMMax = 2560.0                  # cm^-3 pc
+DMMax = 10040.0                 # cm^-3 pc
 DMBinWidth = 6.0                # cm^-3 pc
 TimeBinWidth = 16.0             # seconds
 SecondsPerDay = 86400.0         # seconds

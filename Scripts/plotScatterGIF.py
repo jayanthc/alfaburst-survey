@@ -55,7 +55,7 @@ def animate(frame):
     plt.xlim(0, numTimeBins)
 
     # use these ticks instead of the default ones
-    yVals = np.array([0.0, 500.0, 1000.0, 1500.0, 2000.0, 2500.0])
+    yVals = np.array([0.0, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0, 6000.0, 7000.0, 8000.0, 9000.0, 10000.0])
     ticks = numDMBins * yVals / (DMMax - DMMin)
     plt.yticks(ticks,                                                         \
                map(lambda val: r"$%4.0f$" % val,                              \
@@ -107,7 +107,7 @@ RemoveRFI = True                # dont-remove-rfi flag
 UseLogo = True                  # no-logo flag
 PlotToScreen = False            # plot-to-screen flag
 DMMin = 0.0                     # cm^-3 pc
-DMMax = 2560.0                  # cm^-3 pc
+DMMax = 10040.0                 # cm^-3 pc
 DMBinWidth = 6.0                # cm^-3 pc
 TimeBinWidth = 16.0             # seconds
 SecondsPerDay = 86400.0         # seconds
@@ -290,5 +290,5 @@ else:
     # build filename
     fileImg = "AllBeams_D" + date + "T" + time + ".gif"
     # use a high DPI for high resolution
-    anim.save(fileImg, dpi=192, writer="imagemagick", fps=1)
+    anim.save(fileImg, dpi=64, writer="imagemagick", fps=1)
 

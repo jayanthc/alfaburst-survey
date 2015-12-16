@@ -5,7 +5,7 @@
     <pipeline>
         <clients>
             <ABDataClient>
-                <server host="127.0.0.1" port="15001" />
+                <server host="127.0.0.1" port="15000" />
                 <data type="SpectrumDataSetStokes" adapter="ABDataAdapter" />
             </ABDataClient>
         </clients>
@@ -43,7 +43,7 @@
                 <timeBinsPerBufferPow2 value="15" />
                 <sampleTime seconds="0.000256"/>
                 <channelBandwidth MHz="-0.109375"/>
-                <dedispersionSamples value="10040" />
+                <dedispersionSamples value="2560" />
                 <dedispersionStepSize value="1.0" />
                 <dedispersionMinimum value="0.0" />
                 <numberOfBuffers value="5" />
@@ -62,16 +62,16 @@
             </dataStreams>
             <streamers>
                 <DedispersionDataAnalysisOutput active="true">
-                    <file name="/data/Survey/Data/Beam1_dm" />
+                    <file name="/data/Survey/Data/Beam4_dm" />
                 </DedispersionDataAnalysisOutput>
                 <SigprocStokesWriter active="true" writeHeader="true">
                     <import file="/home/artemis/Survey/Config/common.xml"/>
-                    <beam id="1" />
+                    <beam id="4" />
                     <foff value="-0.109375"/>
                     <tsamp value="0.000256" />
                     <dataBits value="32"/>
                     <subbandsPerPacket value="1"/>
-                    <file filepath="/data/Survey/Data/Beam1_fb" />
+                    <file filepath="/data/Survey/Data/Beam4_fb" />
                     <params telescope="Arecibo" nPolsToWrite="1"/>
                     <TelescopeID value="1"/>
                     <MachineID value="15"/>

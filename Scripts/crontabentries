@@ -1,0 +1,6 @@
+# m h  dom mon dow   command                                                    
+                                                                                
+# Check if ALFA is enabled, if yes, do FRB search, if not, stop FRB search      
+*/1 *   *   *   *   /home/artemis/Survey/Scripts/cognizeALFA.rb >> /home/artemis/Survey/Log/cognizeALFA.log
+0   12  *   *   *   /home/artemis/Survey/Scripts/generatePlots.sh > /home/artemis/Survey/Log/generatePlots.log
+
