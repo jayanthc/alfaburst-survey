@@ -31,8 +31,8 @@ hdr += prep_double("src_raj", 53431.9)
 hdr += prep_double("src_dej", 220052)
 hdr += prep_int("nbits", 32)
 hdr += prep_int("nifs", 1)
-hdr += prep_int("nchans", 4096)
-hdr += prep_double("fch1", 1625)
+hdr += prep_int("nchans", 1024)
+hdr += prep_double("fch1", 1541)
 hdr += prep_double("foff", -0.109375)
 hdr += prep_double("tstart", 56756)
 hdr += prep_double("tsamp", 0.000128)
@@ -125,7 +125,7 @@ for i in range(nPkts - skip):
     if 3 == sq:
         # compute Stokes I
         #(XXacc + YYacc).tofile(fid, sep="")
-        (XXacc + YYacc).astype(np.float32).tofile(fid, sep="")
+        (XXacc + YYacc)[768:1792].astype(np.float32).tofile(fid, sep="")
 
 ## remove the weird high values in channel 0
 ## TODO: check what causes this

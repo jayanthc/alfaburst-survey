@@ -186,9 +186,9 @@ epochGlobs = %x[#{cmd}]
 # generate a plot per epoch
 epochGlobs.each_line do |epochGlob|
   if makePNG
-    cmd = "cd #{LatestDataDir}; #{ScriptsDir}/plotScatter.py -r #{LatestDataDir}/#{epochGlob.strip()}"
+    cmd = "cd #{LatestDataDir}; #{ScriptsDir}/plotScatter.py #{LatestDataDir}/#{epochGlob.strip()}"
   else
-    cmd = "cd #{LatestDataDir}; #{ScriptsDir}/plotScatterGIF.py -r #{LatestDataDir}/#{epochGlob.strip()}"
+    cmd = "cd #{LatestDataDir}; #{ScriptsDir}/plotScatterGIF.py #{LatestDataDir}/#{epochGlob.strip()}"
   end
   if dryRun or verbose
     print cmd, "\n"
