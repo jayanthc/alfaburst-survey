@@ -30,7 +30,7 @@
             <RFI_Clipper active="true" channelRejectionRMS="5.0" spectrumRejectionRMS="6.0">
                 <zeroDMing active="true" />
                 <BandPassData file="/home/artemis/Survey/Config/alfa.bp" />
-                <Band matching="true" />
+                <Band matching="false" />
                 <History maximum="10000" />
             </RFI_Clipper>
 

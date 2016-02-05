@@ -51,7 +51,7 @@ if 0 == sigSrcGregorian and 1 == recALFAEnabled
     }
 
     # check if data acquisition is in progress, if not start it
-    idx = %x[ps -ef | grep FRBsearch.sh | grep -v grep].index("FRBsearch.sh")
+    idx = %x[ps -ef | grep FRBsearch.sh].index("bash")
     if nil == idx
         if !debug
             print "#{dateTime}: LST: #{siderealTime}: ALFA status: "
@@ -68,6 +68,7 @@ if 0 == sigSrcGregorian and 1 == recALFAEnabled
 
         # save starting RF centre frequency to file
         %x[echo "#{rfCenFreq}" > /home/artemis/Survey/Log/LastRFCenFreq.tmp]
+        %x[echo "Start: #{Time.now.to_i}" >> /home/artemis/Survey/Log/surveytime.log]
         %x[/home/artemis/Survey/Scripts/FRBsearch.sh]
     else
         if !debug
@@ -91,9 +92,11 @@ if 0 == sigSrcGregorian and 1 == recALFAEnabled
                 print "#{dateTime}: LST: #{siderealTime}: ALFA status: "
             end
             print "RF centre frequency changed from #{rfCenFreqLast} to #{rfCenFreq}. Restarting data acquisition.\n"
+            %x[echo "Stop: #{Time.now.to_i}" >> /home/artemis/Survey/Log/surveytime.log]
             %x[/home/artemis/Survey/Scripts/killobs_SSH]
             # save starting RF centre frequency to file
             %x[echo "#{rfCenFreq}" > /home/artemis/Survey/Log/LastRFCenFreq.tmp]
+            %x[echo "Start: #{Time.now.to_i}" >> /home/artemis/Survey/Log/surveytime.log]
             %x[/home/artemis/Survey/Scripts/FRBsearch.sh]
         end
     end
@@ -104,12 +107,13 @@ else
 end
 
 if 1 == sigSrcGregorian or 0 == recALFAEnabled
-    idx = %x[ps -ef | grep FRBsearch.sh | grep -v grep].index("FRBsearch.sh")
+    idx = %x[ps -ef | grep FRBsearch.sh].index("bash")
     if idx != nil
         if !debug
             print "#{dateTime}: LST: #{siderealTime}: ALFA status: "
         end
         print "ALFA is down. Stopping data acquisition.\n"
+        %x[echo "Stop: #{Time.now.to_i}" >> /home/artemis/Survey/Log/surveytime.log]
         %x[/home/artemis/Survey/Scripts/killobs_SSH]
     end
 end
