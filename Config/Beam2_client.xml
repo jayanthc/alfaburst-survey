@@ -51,7 +51,7 @@
 
             <DedispersionAnalyser>
                 <detectionThreshold in_sigma="10.0" />
-                <power2ForBinning value="6"/>
+                <power2ForBinning value="4"/>
             </DedispersionAnalyser>
         </modules>
 
