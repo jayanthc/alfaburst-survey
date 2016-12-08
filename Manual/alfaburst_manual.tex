@@ -58,8 +58,8 @@ optimization flags, with \url{TIMING_ENABLED} turned on.
 Note that, for \url{pelican-alfaburst}, you may need to update the path to the
 CUDA library, if you wish to use a newer version of CUDA.
 
-To do a clean install on \url{alfaburst}, login as user \url{artemis}, and do
-the following:
+To do a clean install, login as user \url{artemis} to \url{alfaburst} or one of
+the compute nodes, and do the following:
 
 \begin{enumerate}
 \item \url{cd /home/artemis/Code/alfaburst/pelican/build; rm -rf *}
@@ -68,8 +68,30 @@ the following:
 \item \url{source ../../cmake_pelican-alfaburst_icpc}
 \end{enumerate}
 
-PELICAN libraries are installed in \url{/home/artemis/Code/alfaburst/pelican/install},
-while the AB binaries are installed in \url{/usr/local/pelican-lofar/bin}.
+Ideally, this should work. Unfortunately, some voodoo is required to make this
+work. On the first run of \url{source
+../../cmake_pelican-alfaburst_icpc}, you will encounter the following error:
+
+\small {
+\begin{verbatim}
+gcc: error: unrecognized command line option '-parallel'
+CMake Error at CMakeFiles/ampp-cuda_generated_DedispersionKernel.cu.o.cmake:200
+(message):
+  Error generating
+    /home/artemis/temp/alfaburst/pelican-alfaburst/build/lib/./ampp-cuda_generated_DedispersionKernel.cu.o
+\end{verbatim}
+}
+
+To overcome this, run \url{ccmake .}, which will open up the CMake curses
+interface. Now press \url{q} to quit, and run \url{source
+../../cmake_pelican-alfaburst_icpc} again. Everything should work now.
+
+PELICAN libraries are installed in
+\url{/home/artemis/Code/alfaburst/pelican/install}. To install AB binaries in
+\url{/usr/local/pelican-lofar/bin}, run \url{make install} from one of the
+compute nodes. Prior to this, you will need to make the filesystem writable,
+like so: \url{mount -o rw,remount /usr/local}.
+
 
 \subsection{Survey Configuration Files and Scripts}
 
