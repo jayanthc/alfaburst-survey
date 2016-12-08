@@ -58,8 +58,8 @@ optimization flags, with \url{TIMING_ENABLED} turned on.
 Note that, for \url{pelican-alfaburst}, you may need to update the path to the
 CUDA library, if you wish to use a newer version of CUDA.
 
-To do a clean install, login as user \url{artemis} to \url{alfaburst} or one of
-the compute nodes, and do the following:
+To do a clean install, login as user \url{artemis} to one of the compute nodes,
+and do the following:
 
 \begin{enumerate}
 \item \url{cd /home/artemis/Code/alfaburst/pelican/build; rm -rf *}
@@ -88,8 +88,8 @@ interface. Now press \url{q} to quit, and run \url{source
 
 PELICAN libraries are installed in
 \url{/home/artemis/Code/alfaburst/pelican/install}. To install AB binaries in
-\url{/usr/local/pelican-lofar/bin}, run \url{make install} from one of the
-compute nodes. Prior to this, you will need to make the filesystem writable,
+\url{/usr/local/pelican-lofar/bin}, run \url{make install} (on a
+compute node). Prior to this, you will need to make the filesystem writable,
 like so: \url{mount -o rw,remount /usr/local}.
 
 
