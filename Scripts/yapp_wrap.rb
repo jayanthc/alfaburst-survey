@@ -5,7 +5,7 @@
 #
 # Usage: yapp_wrap.rb [options]
 #     -h  --help                            Display this usage information
-#     -b  --buffer                          ID of buffer to be plotted
+#     -b  --buffer                          ID of buffer to be processed
 #     -y  --yapp "<yapp-command>"           YAPP command
 
 require "getoptlong"
@@ -14,7 +14,7 @@ def printUsage(progName)
   puts <<-EOF
 Usage: #{progName} [options]
     -h  --help                           Display this usage information
-    -b  --buffer                         ID of buffer to be plotted
+    -b  --buffer                         ID of buffer to be processed
     -y  --yapp "<yapp-command>"          YAPP command
   EOF
 end
